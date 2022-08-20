@@ -1,0 +1,29 @@
+---
+services:
+  webhook_receiver.security:
+    class: Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecurity
+    arguments:
+      - '@state'
+      - '@uuid'
+  webhook_receiver.activity_logger:
+    class: Drupal\webhook_receiver\WebhookReceiverActivityLog\WebhookReceiverActivityLog
+    arguments:
+      - '@logger.factory'
+      - '@uuid'
+  webhook_receiver.processor:
+    class: Drupal\webhook_receiver\WebhookReceiverProcessor\WebhookReceiverProcessor
+    arguments:
+      - '@webhook_receiver.activity_logger'
+  webhook_receiver.requirements:
+    class: Drupal\webhook_receiver\WebhookReceiverRequirements\WebhookReceiverRequirements
+    arguments:
+      - '@webhook_receiver'
+  webhook_receiver:
+    class: Drupal\webhook_receiver\WebhookReceiver
+    arguments:
+      - '@webhook_receiver.security'
+      - '@webhook_receiver.processor'
+      - '@webhook_receiver.activity_logger'
+  plugin.manager.webhook_receiver:
+    class: Drupal\webhook_receiver\WebhookReceiverPluginManager
+    parent: default_plugin_manager

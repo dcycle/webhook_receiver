@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install hooks.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function webhook_receiver_example_uninstall() {
+  webhook_receiver()->webhookReceiverSecurity()->removeToken('webhook_receiver_example_log_payload');
+}

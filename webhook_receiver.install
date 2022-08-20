@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * Install hooks.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function webhook_receiver_requirements(string $phase) : array {
+  // Make sure the phase is runtime, otherwise (during installation for
+  // example) the webhook_receiver.requirements service will not be available.
+  if ($phase != 'runtime') {
+    // If ther are any non-runtime requirements, we do not have access
+    // to the webhook_receiver.requirements, so we would define them here.
+    // (There are none at the time of this writing.)
+    return [];
+  }
+  return \Drupal::service('webhook_receiver.requirements')
+    ->hookRequirements($phase);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function webhook_receiver_uninstall() {
+  \Drupal::state()->delete('webhook_receiver_security');
+}

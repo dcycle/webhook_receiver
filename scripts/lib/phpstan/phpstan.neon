@@ -1,0 +1,8 @@
+# See https://github.com/dcycle/docker-phpstan-drupal/blob/master/README.md#custom-config-file
+parameters:
+  excludePaths:
+    - */tests/*
+    - */webhook_receiver/phpunit-autoload.php
+    - */webhook_receiver/phpunit-bootstrap.php
+includes:
+  - /var/www/html/phpstan.neon

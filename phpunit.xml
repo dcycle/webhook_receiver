@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- See https://blog.dcycle.com/unit -->
+<phpunit bootstrap="phpunit-autoload.php">
+  <testsuites>
+    <testsuite name="myproject">
+      <directory>./tests/src/Unit</directory>
+      <directory>./modules/webhook_receiver_example/tests/src/Unit</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>

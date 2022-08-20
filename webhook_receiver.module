@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Runtime hooks.
+ */
+
+// @codingStandardsIgnoreStart
+use Drupal\webhook_receiver\WebhookReceiver;
+// @codingStandardsIgnoreEnd
+
+/**
+ * Quick access to the webhook_receiver service, useful for debugging.
+ *
+ * @return \Drupal\webhook_receiver\WebhookReceiver
+ *   The WebhookReceiver service.
+ */
+function webhook_receiver() : WebhookReceiver {
+  return \Drupal::service('webhook_receiver');
+}

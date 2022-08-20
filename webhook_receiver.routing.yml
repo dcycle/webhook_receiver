@@ -1,0 +1,19 @@
+---
+webhook_receiver.process:
+  path: '/webhook-receiver/{plugin_id}/{token}'
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\webhook_receiver\Controller\WebhookReceiverController::process'
+  requirements:
+    # Anyone can access webhooks. We will perform access logic and token
+    # checking at WebhookReceiver::process().
+    _permission: 'access content'
+webhook_receiver.process.simulate:
+  path: '/webhook-receiver/{plugin_id}/{token}/simulate'
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\webhook_receiver\Controller\WebhookReceiverController::simulate'
+  requirements:
+    # Anyone can access webhooks. We will perform access logic and token
+    # checking at WebhookReceiver::process().
+    _permission: 'access content'
