@@ -1,0 +1,12 @@
+# [CircleCI](https://circleci.com).
+---
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:202201-02
+    steps:
+      - checkout
+      - run:
+          name: Tests
+          command: ./scripts/ci.sh
