@@ -140,11 +140,13 @@ This allows you to search for the error id which will be in the watchdog.
 Local development and testing
 -----
 
-request-response-test
+During local development, you can, in your module, put expected request-reponse pairs in a directory request-response-test in your module.
 
-drush ev 'webhook_receiver()->requestResponseTest("webhook_receiver_example")'
+You can then run these tests using:
 
+    \Drupal::service('webhook_receiver.request_response_test')->run('webhook_receiver_example');
 
+Replacing webhook_receiver_example with your own module's name. (If you enable webhook_receiver_example and run the above comment, you will see the tests with the included webhook_receiver_example module.)
 
 Similar modules
 -----
