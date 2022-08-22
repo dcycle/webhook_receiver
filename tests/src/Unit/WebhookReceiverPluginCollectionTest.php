@@ -4,6 +4,7 @@ namespace Drupal\Tests\webhook_receiver\Unit;
 
 use Drupal\webhook_receiver\WebhookReceiverPluginCollection;
 use PHPUnit\Framework\TestCase;
+use Drupal\webhook_receiver\WebhookReceiverPluginBase;
 
 /**
  * Test WebhookReceiverPluginCollection.
@@ -135,16 +136,20 @@ class WebhookReceiverPluginCollectionTest extends TestCase {
       ->willReturn(new class() {
         function __construct() {}
         function createInstance($x) {
-          return 'instance of ' . $x;
+          return new class('Instance of ' . $x) extends WebhookReceiverPluginBase {
+            public function __construct(string $name) {
+              $this->name = $name;
+            }
+          };
         }
       });
 
     $object->expects($this->once())
       ->method('pluginDefinitions');
-    $output = $object->plugins(TRUE);
+    $output = $this->pluginsToStrings($object->plugins(TRUE));
     $object->expects($this->never())
       ->method('pluginDefinitions');
-    $output2 = $object->plugins();
+    $output2 = $this->pluginsToStrings($object->plugins());
 
     $this->assertTrue($output == $output2, 'static memory works.');
 
@@ -160,6 +165,25 @@ class WebhookReceiverPluginCollectionTest extends TestCase {
   }
 
   /**
+   * Output plugins as an array of strings.
+   *
+   * @param array $plugins
+   *   Plugins.
+   *
+   * @return array
+   *   Corresponding array of strings.
+   */
+  public function pluginsToStrings(array $plugins) : array {
+    $ret = [];
+
+    foreach ($plugins as $plugin) {
+      $ret[] = $plugin->name;
+    }
+
+    return $ret;
+  }
+
+  /**
    * Provider for testPlugins().
    */
   public function providerPlugins() {
@@ -171,8 +195,8 @@ class WebhookReceiverPluginCollectionTest extends TestCase {
           'plugin_id_2' => 'whatever',
         ],
         'expected' => [
-          'plugin_id_1' => 'instance of plugin_id_1',
-          'plugin_id_2' => 'instance of plugin_id_2',
+          'Instance of plugin_id_1',
+          'Instance of plugin_id_2',
         ],
       ],
       [

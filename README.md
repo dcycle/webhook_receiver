@@ -51,19 +51,19 @@ Now get the webhooks:
       [webhook_receiver_plugin_log_payload] => Array
         (
           [plugin_id] => webhook_receiver_example_log_payload
-          [token] => abc123
-          [webhook_path] => /webhook_receiver_example_log_payload/abc123
+          [token] => YOUR_SECURITY_TOKEN
+          [webhook_path] => /webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN
         )
     )
 
-In your case, a unique token will appear instead of abc123. That is meant to secure your webhook and make sure only authorized sources can access it.
+In your case, a unique token will appear instead of YOUR_SECURITY_TOKEN. That is meant to secure your webhook and make sure only authorized sources can access it.
 
 Calling the webhook
 -----
 
 When you call the webhook, you will get feedback on what happened. Let's say you have this module on the site http://example.com, you can run:
 
-    curl -I http://example.com/webhook-receiver/webhook_receiver_example_log_payload/abc123
+    curl -I http://example.com/webhook-receiver/webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN
 
 This will give you an error:
 
@@ -75,7 +75,7 @@ This is normal because webhook receiver only accepts POSTs.
 ### If the key 'This must be set!' is present in the payload, the value of that key is logged to the watchdog.
 
     curl -i -X POST \
-    http://0.0.0.0:59907/webhook-receiver/webhook_receiver_example_log_payload/6g_FDw46k4A9lFeQheWAYxQRMmAqmtpxvy4uhS-6ICE \
+    http://example.com/webhook-receiver/webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN \
     -H 'Accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{
@@ -89,7 +89,7 @@ And our webhook does what it's meant to do (as this is just an example): it logs
 ### As with any webhook, if the token is incorrect, we get an error.
 
     curl -i -X POST \
-    http://0.0.0.0:59907/webhook-receiver/webhook_receiver_example_log_payload/THE_WRONG_TOKEN \
+    http://example.com/webhook-receiver/webhook_receiver_example_log_payload/THE_WRONG_TOKEN \
     -H 'Accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{
@@ -102,7 +102,7 @@ And our webhook does what it's meant to do (as this is just an example): it logs
 ### As with any webhook, if the payload contains data but is not valid JSON, we get a 400 (bad request) code.
 
     curl -i -X POST \
-    http://0.0.0.0:59907/webhook-receiver/webhook_receiver_example_log_payload/6g_FDw46k4A9lFeQheWAYxQRMmAqmtpxvy4uhS-6ICE \
+    http://example.com/webhook-receiver/webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN \
     -H 'Accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{"This is bad JSON",}'
@@ -113,7 +113,7 @@ And our webhook does what it's meant to do (as this is just an example): it logs
 ### If the payload does not contain the required "This must be set!" key, we also end up with a bad request.
 
     curl -i -X POST \
-    http://0.0.0.0:59907/webhook-receiver/webhook_receiver_example_log_payload/6g_FDw46k4A9lFeQheWAYxQRMmAqmtpxvy4uhS-6ICE \
+    http://example.com/webhook-receiver/webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN \
     -H 'Accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{"The required key is not present": "hello"}'
@@ -121,9 +121,32 @@ And our webhook does what it's meant to do (as this is just an example): it logs
     HTTP/1.1 400 Bad Request
     ...
 
+### Our example module simulates what happens if an internal error occurs.
 
+    curl -i -X POST \
+    http://example.com/webhook-receiver/webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "This must be set!": "Simulate internal exception on validate."
+    }'
+    ...
+    HTTP/1.1 500 Internal Server Error
+    ...
+    {"code":500,"time":1661192152,"log":{"errors":[{"message":"An error occurred during processing. Find the following id in the Drupal logs for details","id":"2a9579e8-1e3a-495b-adc8-f0706769a81f"}],"debug":[]},"access":true,"continue":true}%
 
+This allows you to search for the error id which will be in the watchdog.
 
+Local development and testing
+-----
+
+During local development, you can, in your module, put expected request-reponse pairs in a directory request-response-test in your module.
+
+You can then run these tests using:
+
+    \Drupal::service('webhook_receiver.request_response_test')->run('webhook_receiver_example');
+
+Replacing webhook_receiver_example with your own module's name. (If you enable webhook_receiver_example and run the above comment, you will see the tests with the included webhook_receiver_example module.)
 
 Similar modules
 -----

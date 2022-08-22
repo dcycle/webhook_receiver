@@ -6,7 +6,11 @@ use Drupal\webhook_receiver\WebhookReceiver;
 use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLog;
 use Drupal\webhook_receiver\WebhookReceiverActivityLog\WebhookReceiverActivityLogInterface;
+use Drupal\Component\Datetime\TimeInterface;
 
+/**
+ * A processor of arbitrary webhook requests.
+ */
 class WebhookReceiverProcessor implements WebhookReceiverProcessorInterface {
 
   const FORBIDDEN = 403;
@@ -23,13 +27,23 @@ class WebhookReceiverProcessor implements WebhookReceiverProcessorInterface {
   protected $activityLogger;
 
   /**
+   * The injected time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected $time;
+
+  /**
    * Class constructor.
    *
    * @param \Drupal\webhook_receiver\WebhookReceiverActivityLog\WebhookReceiverActivityLogInterface $activityLogger
    *   The injected activity logger.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The injected time service.
    */
-  public function __construct(WebhookReceiverActivityLogInterface $activityLogger) {
+  public function __construct(WebhookReceiverActivityLogInterface $activityLogger, TimeInterface $time) {
     $this->activityLogger = $activityLogger;
+    $this->time = $time;
   }
 
   /**
@@ -47,11 +61,12 @@ class WebhookReceiverProcessor implements WebhookReceiverProcessorInterface {
    */
   public function process(WebhookReceiver $app, string $plugin_id, string $token, bool $simulate, array $payload) : array {
     $log = $this->log();
+    $plugin_id = trim($plugin_id);
 
     try {
       $ret = [
         'code' => self::NOT_FOUND,
-        'time' => rand(),
+        'time' => $this->time->getRequestTime(),
         'log' => [
           'errors' => [],
           'debug' => [],
@@ -65,12 +80,15 @@ class WebhookReceiverProcessor implements WebhookReceiverProcessorInterface {
         return $ret;
       }
 
-      if (array_key_exists($plugin_id, $app->webhooks())) {
+      $webhooks = $app->webhooks();
+      if (array_key_exists($plugin_id, $webhooks)) {
         $log->debug($plugin_id . ' exists, processing.');
         $this->processExisting($app, $plugin_id, $token, $ret, $log, $simulate, $payload);
       }
       else {
-        $log->debug($plugin_id . ' not found in list in webhook plugins.');
+        $plugins = count($webhooks) ? 'Plugins are ' . implode(', ', array_keys($webhooks)) : 'No plugins were found';
+
+        $log->debug($plugin_id . ' not found in list in webhook plugins. ' . $plugins . '.');
       }
 
     }
@@ -85,14 +103,29 @@ class WebhookReceiverProcessor implements WebhookReceiverProcessorInterface {
 
     $ret['log'] = $log->toArray();
 
-    if (count($ret['log']['errors'])) {
-      $ret['code'] = self::ERROR;
-    }
-
     return $ret;
   }
 
-  public function processExisting(WebhookReceiver $app, string $plugin_id, string $token, &$ret, $log, $simulate, $payload) {
+  /**
+   * Process an existing plugin for which we do not know if it can be accessed.
+   *
+   * @param \Drupal\webhook_receiver\WebhookReceiver $app
+   *   The module singleton.
+   * @param string $plugin_id
+   *   The plugin ID which will process the request.
+   * @param string $token
+   *   The unencrypted token.
+   * @param array $ret
+   *   A return array which will be stringified and client-facing.
+   * @param \Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface $log
+   *   A client-facing log.
+   * @param bool $simulate
+   *   Whether or not to simulate the action.
+   * @param array $payload
+   *   An array with the "payload" key, and keys for the payload errors and
+   *   debug messages.
+   */
+  public function processExisting(WebhookReceiver $app, string $plugin_id, string $token, array &$ret, WebhookReceiverLogInterface $log, bool $simulate, array $payload) {
 
     $log->debug($plugin_id . ' exists, moving on.');
     $log->debug('Access set to FALSE unless a plugin determines safe acess.');
@@ -117,10 +150,29 @@ class WebhookReceiverProcessor implements WebhookReceiverProcessorInterface {
     }
   }
 
-  public function processNow($app, $plugin_id, $log, $simulate, $payload, array &$ret) {
-    if ($app->plugins()->byId($plugin_id)->validatePayloadArray($payload['payload'], $log, $simulate)) {
+  /**
+   * Validate and, if validated, process the request.
+   *
+   * @param \Drupal\webhook_receiver\WebhookReceiver $app
+   *   The module singleton.
+   * @param string $plugin_id
+   *   The plugin ID which will process the request.
+   * @param \Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface $log
+   *   A client-facing log.
+   * @param bool $simulate
+   *   Whether or not to simulate the action.
+   * @param array $payload
+   *   An array with the "payload" key, and keys for the payload errors and
+   *   debug messages.
+   * @param array $ret
+   *   A return array which will be stringified and client-facing.
+   */
+  public function processNow(WebhookReceiver $app, string $plugin_id, WebhookReceiverLogInterface $log, bool $simulate, array $payload, array &$ret) {
+    if ($app->plugins()->byId($plugin_id)->validatePayloadArray($payload['payload'], $log)) {
       $log->debug('Payload is valid. Moving on to process request.');
-      $app->plugins()->byId($plugin_id)->processPayloadArray($payload['payload'], $log, $simulate);
+      $app->plugins()
+        ->byId($plugin_id)
+        ->processPayloadArray($payload['payload'], $log, $simulate);
       $ret['code'] = self::OK;
     }
     else {

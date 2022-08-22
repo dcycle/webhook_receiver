@@ -4,7 +4,7 @@ namespace Drupal\webhook_receiver;
 
 use Drupal\webhook_receiver\Utilities\Singleton;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\webhook_receiver\WebhookReceiver;
+use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 
 /**
  * Abstraction around a collection of plugins.
@@ -127,10 +127,36 @@ class WebhookReceiverPluginCollection implements WebhookReceiverPluginInterface 
   /**
    * {@inheritdoc}
    */
-  public function before(WebhookReceiver $app, string $plugin_id, string $token, &$ret, $log) {
+  public function before(WebhookReceiver $app, string $plugin_id, string $token, array &$ret, WebhookReceiverLogInterface $log) {
     foreach ($this->plugins() as $plugin) {
       $plugin->before($app, $plugin_id, $token, $ret, $log);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processPayloadArray(array $payload, WebhookReceiverLogInterface $log, bool $simulate) {
+    foreach ($this->plugins() as $plugin) {
+      $plugin->processPayloadArray($payload, $log, $simulate);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validatePayloadArray(array $payload, WebhookReceiverLogInterface $log) : bool {
+    if (!count($this->plugins())) {
+      return FALSE;
+    }
+
+    $ret = TRUE;
+
+    foreach ($this->plugins() as $plugin) {
+      $ret = $ret && $plugin->validatePayloadArray($payload, $log);
+    }
+
+    return $ret;
   }
 
   /**

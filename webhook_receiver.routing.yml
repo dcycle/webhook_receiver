@@ -3,7 +3,7 @@ webhook_receiver.process:
   path: '/webhook-receiver/{plugin_id}/{token}'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\webhook_receiver\Controller\WebhookReceiverController::process'
+    _controller: '\Drupal\webhook_receiver\Controller\WebhookReceiverController::process' # yamllint disable-line
   requirements:
     # Anyone can access webhooks. We will perform access logic and token
     # checking at WebhookReceiver::process().
@@ -12,7 +12,7 @@ webhook_receiver.process.simulate:
   path: '/webhook-receiver/{plugin_id}/{token}/simulate'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\webhook_receiver\Controller\WebhookReceiverController::simulate'
+    _controller: '\Drupal\webhook_receiver\Controller\WebhookReceiverController::simulate' # yamllint disable-line
   requirements:
     # Anyone can access webhooks. We will perform access logic and token
     # checking at WebhookReceiver::process().

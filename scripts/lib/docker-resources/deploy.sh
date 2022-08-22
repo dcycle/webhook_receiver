@@ -29,4 +29,3 @@ fi
 
 drush si -y --db-url "mysql://root:drupal@mysql/drupal" minimal
 drush en -y webhook_receiver_example
-drush ev "\Drupal::service('webhook_receiver')->instructions()"

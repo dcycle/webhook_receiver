@@ -4,6 +4,9 @@ namespace Drupal\webhook_receiver\WebhookReceiverProcessor;
 
 use Drupal\webhook_receiver\WebhookReceiver;
 
+/**
+ * Processor for a request.
+ */
 interface WebhookReceiverProcessorInterface {
 
   /**
