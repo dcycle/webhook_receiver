@@ -12,35 +12,35 @@ class WebhookReceiverLog implements WebhookReceiverLogInterface {
    *
    * @var array
    */
-  protected $_errors;
+  protected $errors;
 
   /**
    * The debug messages.
    *
    * @var array
    */
-  protected $_debug;
+  protected $debug;
 
   /**
    * Constructor.
    */
   public function __construct() {
-    $this->_errors = [];
-    $this->_debug = [];
+    $this->errors = [];
+    $this->debug = [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function err(string $string) {
-    $this->_errors[] = $string;
+    $this->errors[] = $string;
   }
 
   /**
    * {@inheritdoc}
    */
   public function debug(string $string) {
-    $this->_debug[] = $string;
+    $this->debug[] = $string;
   }
 
   /**
@@ -48,8 +48,8 @@ class WebhookReceiverLog implements WebhookReceiverLogInterface {
    */
   public function toArray() : array {
     return [
-      'errors' => $this->_errors,
-      'debug' => $this->_debug,
+      'errors' => $this->errors,
+      'debug' => $this->debug,
     ];
   }
 

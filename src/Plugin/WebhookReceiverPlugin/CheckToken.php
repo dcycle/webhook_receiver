@@ -4,9 +4,6 @@ namespace Drupal\webhook_receiver\Plugin\WebhookReceiverPlugin;
 
 use Drupal\webhook_receiver\WebhookReceiverPluginBase;
 use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\webhook_receiver\WebhookReceiver;
 
 /**
@@ -14,6 +11,7 @@ use Drupal\webhook_receiver\WebhookReceiver;
  *
  * @WebhookReceiverPluginAnnotation(
  *   id = "webhook_receiver_check_token",
+ *   hide = true,
  *   description = @Translation("Checks the token for all webhooks."),
  *   weight = -100,
  *   examples = {
@@ -25,7 +23,7 @@ class CheckToken extends WebhookReceiverPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function before(WebhookReceiver $app, string $plugin_id, string $token, &$ret, $log) {
+  public function before(WebhookReceiver $app, string $plugin_id, string $token, array &$ret, WebhookReceiverLogInterface $log) {
     if ($app->webhookReceiverSecurity()->token($plugin_id) != $token) {
       $log->debug('The token is invalid, access is denied.');
       $ret['access'] = FALSE;

@@ -3,14 +3,7 @@
 namespace Drupal\webhook_receiver\WebhookReceiverSecurity;
 
 use Drupal\Component\Utility\Crypt;
-use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
-use Drupal\Core\Messenger\MessengerTrait;
-use Drupal\Core\Render\RenderContext;
-use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\State\State;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\system\SystemManager;
-use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Site\Settings;
 
 /**
@@ -33,7 +26,7 @@ class WebhookReceiverSecurity {
    * @return string
    *   The encrypted string.
    */
-  function safeEncrypt(string $message, string $key) : string {
+  public function safeEncrypt(string $message, string $key) : string {
     if (mb_strlen($key, '8bit') !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
       throw new \Exception('Key is not the correct size (must be 32 bytes).');
     }
@@ -58,10 +51,10 @@ class WebhookReceiverSecurity {
    * @return string
    *   The unencrypted message.
    */
-  function safeDecrypt(string $encrypted, string $key) : string {
+  public function safeDecrypt(string $encrypted, string $key) : string {
     $decoded = base64_decode($encrypted);
     $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
-    $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
+    $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, NULL, '8bit');
 
     $plain = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
     if (!is_string($plain)) {
@@ -72,7 +65,15 @@ class WebhookReceiverSecurity {
     return $plain;
   }
 
-  function removeToken(string $id) {
+  /**
+   * Remove a token from the database.
+   *
+   * @param string $id
+   *   A token to remove from the database.
+   */
+  public function removeToken(string $id) {
+    $id = (trim($id));
+
     $tokens = $this->allEncryptedTokens();
     unset($tokens[$id]);
     $this->state->set(self::STATE_VAR, $tokens);
@@ -120,6 +121,12 @@ class WebhookReceiverSecurity {
     return $hash_salt_32;
   }
 
+  /**
+   * Get all encrypted tokens keyed by id.
+   *
+   * @return array
+   *   All encyprted tokens keyed by id.
+   */
   public function allEncryptedTokens() : array {
     $tokens = $this->state->get(self::STATE_VAR, []);
 
@@ -130,7 +137,18 @@ class WebhookReceiverSecurity {
     return $tokens;
   }
 
+  /**
+   * Get a token for a key, create a new one if it does not exist.
+   *
+   * @param string $key
+   *   A key to which this token should be associated.
+   *
+   * @return string
+   *   The decrypted token.
+   */
   public function token(string $key) : string {
+    $key = (trim($key));
+
     if (!$key) {
       throw new \Exception('Webhook key must not be empty. The key is the plugin id, for example webhook_receiver_example_log_payload.');
     }
@@ -159,11 +177,24 @@ class WebhookReceiverSecurity {
     return $candidate;
   }
 
+  /**
+   * Create a new token, encrypted it and save it to the database.
+   *
+   * If a token for this key already exists, it will be overwritten.
+   *
+   * @param string $key
+   *   A key to which this token should be associated.
+   *
+   * @return string
+   *   The unencrypted token.
+   */
   public function createNewToken(string $key) : string {
+    $key = (trim($key));
+
     $unencrypted = Crypt::hashBase64(random_bytes(128));
     $tokens = $this->allEncryptedTokens();
-    // Encrypt newly-generated tokens following the database of encryption
-    // at rest.s
+    // Encrypt newly-generated tokens following the principle of encryption
+    // at rest.
     $tokens[$key] = $this->safeEncrypt($unencrypted, $this->encryptionKey());
     $this->state->set(self::STATE_VAR, $tokens);
     return $unencrypted;

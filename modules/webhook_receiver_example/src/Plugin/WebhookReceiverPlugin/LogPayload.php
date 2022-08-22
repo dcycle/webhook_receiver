@@ -29,8 +29,8 @@ class LogPayload extends WebhookReceiverPluginBase implements ContainerFactoryPl
   protected $loggerFactory;
 
   const PAYLOAD_REQUIRED_KEY = 'This must be set!';
-  const VALUE_TO_SIMULATE_EXCEPTION_ON_VALIDATE = 'EV';
-  const VALUE_TO_SIMULATE_EXCEPTION_ON_PROCESS = 'EP';
+  const VALUE_TO_SIMULATE_EXCEPTION_ON_VALIDATE = 'Simulate internal exception on validate.';
+  const VALUE_TO_SIMULATE_EXCEPTION_ON_PROCESS = 'Simulate internal exception on process.';
 
   /**
    * Class constructor.
@@ -86,12 +86,20 @@ class LogPayload extends WebhookReceiverPluginBase implements ContainerFactoryPl
   /**
    * {@inheritdoc}
    */
-  public function processPayloadArray(array $payload, WebhookReceiverLogInterface $log) {
+  public function processPayloadArray(array $payload, WebhookReceiverLogInterface $log, bool $simulate) {
     if ($payload[self::PAYLOAD_REQUIRED_KEY] == self::VALUE_TO_SIMULATE_EXCEPTION_ON_PROCESS) {
       throw new \Exception('Simulating exception because the value of key ' . self::PAYLOAD_REQUIRED_KEY . ' is ' . self::VALUE_TO_SIMULATE_EXCEPTION_ON_PROCESS);
     }
 
-    $this->loggerFactory->get('webhook_receiver_example')->notice("The payload's '" . self::PAYLOAD_REQUIRED_KEY . "' key is: " . $payload[self::PAYLOAD_REQUIRED_KEY]);
+    $notice = "The payload's '" . self::PAYLOAD_REQUIRED_KEY . "' key is: " . $payload[self::PAYLOAD_REQUIRED_KEY];
+
+    if ($simulate) {
+      $log->debug('We are simulating the action so we are not actually logging anything in the watchdog. If we were not simulating we would log:');
+      $log->debug($notice);
+    }
+    else {
+      $this->loggerFactory->get('webhook_receiver_example')->notice($notice);
+    }
 
     $log->debug('The payload has been logged successfully');
   }

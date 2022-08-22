@@ -2,11 +2,8 @@
 
 namespace Drupal\Tests\webhook_receiver\Unit\WebhookReceiverProcessor;
 
-use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\webhook_receiver\WebhookReceiverProcessor\WebhookReceiverProcessor;
-use Drupal\webhook_receiver\WebhookReceiver;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Test WebhookReceiverProcessor.

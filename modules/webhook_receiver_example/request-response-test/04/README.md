@@ -1,0 +1,1 @@
+Simulate an exception.

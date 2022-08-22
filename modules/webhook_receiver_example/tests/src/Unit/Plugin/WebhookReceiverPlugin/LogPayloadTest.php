@@ -4,7 +4,7 @@ namespace Drupal\Tests\webhook_receiver_example\Unit\Plugin\WebhookReceiverPlugi
 
 use Drupal\webhook_receiver_example\Plugin\WebhookReceiverPlugin\LogPayload;
 use PHPUnit\Framework\TestCase;
-use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
+use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLog;
 
 /**
  * Test LogPayload.
@@ -12,31 +12,6 @@ use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
  * @group webhook_receiver
  */
 class LogPayloadTest extends TestCase {
-
-  /**
-   * Return a mock log object.
-   *
-   * The Drupal log (different from this one) logs to the watchdog. This log
-   * object logs information to be displayed as a response to a webhook call.
-   *
-   * @return \Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface
-   *   A mock log.
-   */
-  public function mockLog() : WebhookReceiverLogInterface {
-    return new class() implements WebhookReceiverLogInterface {
-      public function __construct() {
-        $this->_err = [];
-        $this->_debug = [];
-      }
-      public function err(string $string) {
-        $this->_err[] = $string;
-      }
-      public function debug(string $string) {
-        $this->_debug[] = $string;
-      }
-
-    };
-  }
 
   /**
    * Test for validatePayloadArray().
@@ -68,7 +43,7 @@ class LogPayloadTest extends TestCase {
       $this->expectException($exception);
     }
 
-    $output = $object->validatePayloadArray($input, $log = $this->mockLog());
+    $output = $object->validatePayloadArray($input, $log = new WebhookReceiverLog());
 
     if ($output != $expected_result) {
       print_r([
@@ -77,14 +52,14 @@ class LogPayloadTest extends TestCase {
         'expected' => $expected_result,
       ]);
     }
-    if ($log->_debug != $expected_debug_messages) {
+    if ($log->toArray()['debug'] != $expected_debug_messages) {
       print_r([
         'message' => $output,
         'debug messages' => $log->_debug,
         'expected' => $expected_debug_messages,
       ]);
     }
-    if ($log->_err != $expected_errors) {
+    if ($log->toArray()['errors'] != $expected_errors) {
       print_r([
         'message' => $output,
         'errors' => $log->_err,
@@ -93,8 +68,8 @@ class LogPayloadTest extends TestCase {
     }
 
     $this->assertTrue($output == $expected_result, $message);
-    $this->assertTrue($log->_err == $expected_errors, $message);
-    $this->assertTrue($log->_debug == $expected_debug_messages, $message);
+    $this->assertTrue($log->toArray()['errors'] == $expected_errors, $message);
+    $this->assertTrue($log->toArray()['debug'] == $expected_debug_messages, $message);
   }
 
   /**

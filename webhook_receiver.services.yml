@@ -1,21 +1,33 @@
 ---
 services:
   webhook_receiver.security:
-    class: Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecurity
+    class: >-
+      Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecurity
     arguments:
       - '@state'
       - '@uuid'
   webhook_receiver.activity_logger:
-    class: Drupal\webhook_receiver\WebhookReceiverActivityLog\WebhookReceiverActivityLog
+    class: >-
+      Drupal\webhook_receiver\WebhookReceiverActivityLog\WebhookReceiverActivityLog
     arguments:
       - '@logger.factory'
       - '@uuid'
+  webhook_receiver.request_response_test:
+    class: >-
+      Drupal\webhook_receiver\WebhookReceiverRequestResponseTest\WebhookReceiverRequestResponseTest
+    arguments:
+      - '@file_system'
+      - '@webhook_receiver'
+      - '@extension.list.module'
   webhook_receiver.processor:
-    class: Drupal\webhook_receiver\WebhookReceiverProcessor\WebhookReceiverProcessor
+    class: >-
+      Drupal\webhook_receiver\WebhookReceiverProcessor\WebhookReceiverProcessor
     arguments:
       - '@webhook_receiver.activity_logger'
+      - '@datetime.time'
   webhook_receiver.requirements:
-    class: Drupal\webhook_receiver\WebhookReceiverRequirements\WebhookReceiverRequirements
+    class: >-
+      Drupal\webhook_receiver\WebhookReceiverRequirements\WebhookReceiverRequirements
     arguments:
       - '@webhook_receiver'
   webhook_receiver:
