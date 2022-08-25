@@ -198,17 +198,7 @@ If you visit /admin/reports/status on the website you'll see:
 
 This tells you that three requests have been queued but not yet run.
 
-You can also get this information programmatically by running:
-
-    \Drupal::service('webhook_receiver_defer')->countByType();
-
-You can manually process a single request by running:
-
-    \Drupal::service('webhook_receiver_defer')->countByType();
-
-
-
-
+The requests are all processed on cron and they are kept in the database indefinitely along with the responses. It is up to you to periodically prune your database to avoid it getting too large.
 
 Local development and testing
 -----
