@@ -75,7 +75,9 @@ class Processor implements ProcessorInterface {
       ];
 
       // If the payload has errors, fail fast.
-      if ($num_errors = $payload->numErrors()) {
+      $num_errors = $payload->numErrors();
+
+      if ($num_errors) {
         $ret['log']['errors'] = $payload->errorsAsArray();
         $ret['code'] = self::BAD_REQUEST;
         return $ret;

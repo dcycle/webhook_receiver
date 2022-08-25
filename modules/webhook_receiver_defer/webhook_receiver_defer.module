@@ -15,7 +15,11 @@ use Drupal\webhook_receiver_defer\WebhookReceiverDefer;
  * @return \Drupal\webhook_receiver_defer\WebhookReceiverDefer
  *   The WebhookReceiverDefer service.
  */
+// @codingStandardsIgnoreStart
+// PHP Lint wants this to be prefixed with the module name, but it _is_
+// the same as the module name, so I consider this ok.
 function webhook_receiver_defer() : WebhookReceiverDefer {
+// @codingStandardsIgnoreEnd
   return \Drupal::service('webhook_receiver_defer');
 }
 

@@ -15,6 +15,10 @@ use Drupal\webhook_receiver\WebhookReceiver;
  * @return \Drupal\webhook_receiver\WebhookReceiver
  *   The WebhookReceiver service.
  */
+// @codingStandardsIgnoreStart
+// PHP Lint wants this to be prefixed with the module name, but it _is_
+// the same as the module name, so I consider this ok.
 function webhook_receiver() : WebhookReceiver {
+// @codingStandardsIgnoreEnd
   return \Drupal::service('webhook_receiver');
 }
