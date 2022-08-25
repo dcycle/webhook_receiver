@@ -2,12 +2,13 @@
 
 namespace Drupal\webhook_receiver\Plugin\WebhookReceiverPlugin;
 
+use Drupal\webhook_receiver\Payload\PayloadInterface;
 use Drupal\webhook_receiver\WebhookReceiverPluginBase;
 use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 use Drupal\webhook_receiver\WebhookReceiver;
 
 /**
- * Very simple example of the webhook receiver module which logs the payload.
+ * Checks the token for all webhooks.
  *
  * @WebhookReceiverPluginAnnotation(
  *   id = "webhook_receiver_check_token",
@@ -23,7 +24,7 @@ class CheckToken extends WebhookReceiverPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function before(WebhookReceiver $app, string $plugin_id, string $token, array &$ret, WebhookReceiverLogInterface $log) {
+  public function before(WebhookReceiver $app, string $plugin_id, string $token, array &$ret, WebhookReceiverLogInterface $log, PayloadInterface $payload, bool $simulate) {
     if ($app->webhookReceiverSecurity()->token($plugin_id) != $token) {
       $log->debug('The token is invalid, access is denied.');
       $ret['access'] = FALSE;

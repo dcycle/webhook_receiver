@@ -1,13 +1,14 @@
 <?php
 
-namespace Drupal\webhook_receiver\WebhookReceiverProcessor;
+namespace Drupal\webhook_receiver\Processor;
 
 use Drupal\webhook_receiver\WebhookReceiver;
+use Drupal\webhook_receiver\Payload\PayloadInterface;
 
 /**
  * Processor for a request.
  */
-interface WebhookReceiverProcessorInterface {
+interface ProcessorInterface {
 
   /**
    * Process a request.
@@ -20,7 +21,7 @@ interface WebhookReceiverProcessorInterface {
    *   A token.
    * @param bool $simulate
    *   Whether to simulate the request.
-   * @param array $payload
+   * @param \Drupal\webhook_receiver\Payload\PayloadInterface $payload
    *   An array with the keys: 'payload' for the payload itself, and
    *   'payload_errors' for any errors which should trigger a 500 error,
    *   'payload_notices' for any notices which have no effect on the response
@@ -29,6 +30,6 @@ interface WebhookReceiverProcessorInterface {
    * @return array
    *   A response for output as JSON.
    */
-  public function process(WebhookReceiver $app, string $plugin_id, string $token, bool $simulate, array $payload) : array;
+  public function process(WebhookReceiver $app, string $plugin_id, string $token, bool $simulate, PayloadInterface $payload) : array;
 
 }

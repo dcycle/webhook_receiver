@@ -12,16 +12,25 @@ services:
     arguments:
       - '@logger.factory'
       - '@uuid'
+  webhook_receiver.array_pathfinder:
+    class: >-
+      Drupal\webhook_receiver\ArrayPathfinder\ArrayPathfinder
+  webhook_receiver.payload_factory:
+    class: >-
+      Drupal\webhook_receiver\Payload\PayloadFactory
+    arguments:
+      - '@webhook_receiver.array_pathfinder'
   webhook_receiver.request_response_test:
     class: >-
-      Drupal\webhook_receiver\WebhookReceiverRequestResponseTest\WebhookReceiverRequestResponseTest
+      Drupal\webhook_receiver\SelfTest\RequestResponseTest
     arguments:
       - '@file_system'
       - '@webhook_receiver'
       - '@extension.list.module'
+      - '@webhook_receiver.payload_factory'
   webhook_receiver.processor:
     class: >-
-      Drupal\webhook_receiver\WebhookReceiverProcessor\WebhookReceiverProcessor
+      Drupal\webhook_receiver\Processor\Processor
     arguments:
       - '@webhook_receiver.activity_logger'
       - '@datetime.time'

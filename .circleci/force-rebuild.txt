@@ -1,1 +1,4 @@
+Sometimes CircleCI will refuse to rebuild existing commits and you will need
+to commit something in order to nudge CircleCI into action. If such is the case
+you can change the string below:
 2022-03-17-08:57:16

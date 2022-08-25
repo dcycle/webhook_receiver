@@ -3,6 +3,7 @@
 namespace Drupal\webhook_receiver;
 
 use Drupal\webhook_receiver\Utilities\Singleton;
+use Drupal\webhook_receiver\Payload\PayloadInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 
@@ -127,25 +128,25 @@ class WebhookReceiverPluginCollection implements WebhookReceiverPluginInterface 
   /**
    * {@inheritdoc}
    */
-  public function before(WebhookReceiver $app, string $plugin_id, string $token, array &$ret, WebhookReceiverLogInterface $log) {
+  public function before(WebhookReceiver $app, string $plugin_id, string $token, array &$ret, WebhookReceiverLogInterface $log, PayloadInterface $payload, bool $simulate) {
     foreach ($this->plugins() as $plugin) {
-      $plugin->before($app, $plugin_id, $token, $ret, $log);
+      $plugin->before($app, $plugin_id, $token, $ret, $log, $payload, $simulate);
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function processPayloadArray(array $payload, WebhookReceiverLogInterface $log, bool $simulate) {
+  public function processPayload(PayloadInterface $payload, WebhookReceiverLogInterface $log, bool $simulate) {
     foreach ($this->plugins() as $plugin) {
-      $plugin->processPayloadArray($payload, $log, $simulate);
+      $plugin->processPayload($payload, $log, $simulate);
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function validatePayloadArray(array $payload, WebhookReceiverLogInterface $log) : bool {
+  public function validatePayload(PayloadInterface $payload, WebhookReceiverLogInterface $log) : bool {
     if (!count($this->plugins())) {
       return FALSE;
     }
@@ -153,7 +154,7 @@ class WebhookReceiverPluginCollection implements WebhookReceiverPluginInterface 
     $ret = TRUE;
 
     foreach ($this->plugins() as $plugin) {
-      $ret = $ret && $plugin->validatePayloadArray($payload, $log);
+      $ret = $ret && $plugin->validatePayload($payload, $log);
     }
 
     return $ret;

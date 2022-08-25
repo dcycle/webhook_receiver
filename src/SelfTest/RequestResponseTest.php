@@ -1,20 +1,23 @@
 <?php
 
-namespace Drupal\webhook_receiver\WebhookReceiverRequestResponseTest;
+namespace Drupal\webhook_receiver\SelfTest;
 
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\webhook_receiver\WebhookReceiver;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Extension\ExtensionList;
+use Drupal\webhook_receiver\Payload\PayloadFactoryInterface;
 
 /**
  * Finds the directory "request-response-test" and runs the tests therein.
  *
  * Each module can have a request-response-test directory.
  */
-class WebhookReceiverRequestResponseTest {
+class RequestResponseTest {
 
   const SUBDIR = 'request-response-test';
+
+  use SelfTestLogTrait;
 
   /**
    * The injected file system.
@@ -38,6 +41,13 @@ class WebhookReceiverRequestResponseTest {
   protected $extensionList;
 
   /**
+   * The injected payload factory.
+   *
+   * @var \Drupal\webhook_receiver\Payload\PayloadFactoryInterface
+   */
+  protected $payloadFactory;
+
+  /**
    * Class constructor.
    *
    * @param \Drupal\Core\File\FileSystemInterface $fileSystem
@@ -46,11 +56,14 @@ class WebhookReceiverRequestResponseTest {
    *   The injected app singleton.
    * @param \Drupal\Core\Extension\ExtensionList $extensionList
    *   The injected extension list.
+   * @param \Drupal\webhook_receiver\Payload\PayloadFactoryInterface $payloadFactory
+   *   The injected payload factory.
    */
-  public function __construct(FileSystemInterface $fileSystem, WebhookReceiver $app, ExtensionList $extensionList) {
+  public function __construct(FileSystemInterface $fileSystem, WebhookReceiver $app, ExtensionList $extensionList, PayloadFactoryInterface $payloadFactory) {
     $this->fileSystem = $fileSystem;
     $this->app = $app;
     $this->extensionList = $extensionList;
+    $this->payloadFactory = $payloadFactory;
   }
 
   /**
@@ -77,7 +90,7 @@ class WebhookReceiverRequestResponseTest {
     $this->log('');
     $this->log('The response is =>');
     $this->log('');
-    $this->log($response = $this->toGenericResponse($this->app->process($plugin_id, $this->app->webhookReceiverSecurity()->token($plugin_id), TRUE, $req)));
+    $this->log($response = $this->toGenericResponse($this->app->process($plugin_id, $this->app->webhookReceiverSecurity()->token($plugin_id), TRUE, $this->payloadFactory->fromString($req))));
     $this->log('');
     $this->log('The EXPECTED response is =>');
     $this->log('');

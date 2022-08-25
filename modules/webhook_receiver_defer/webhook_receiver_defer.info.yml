@@ -1,0 +1,9 @@
+---
+name: Webhook Receiver Defer
+type: module
+description: >-
+  Defer processing of webhoks. See ./README.md.
+core_version_requirement: ^9
+php: '8.x'
+dependencies:
+  - webhook_receiver:webhook_receiver

@@ -8,6 +8,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\webhook_receiver\Utilities\Mockables;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Drupal\webhook_receiver\Payload\PayloadInterface;
+use Drupal\webhook_receiver\Payload\PayloadFactoryInterface;
 
 /**
  * Controller for the /admin/reports/status/[token] request.
@@ -31,16 +33,26 @@ class WebhookReceiverController extends ControllerBase {
   protected $requestStack;
 
   /**
+   * The injected payload factory.
+   *
+   * @var \Drupal\webhook_receiver\Payload\PayloadFactoryInterface
+   */
+  protected $payloadFactory;
+
+  /**
    * Constructs a new WebhookReceiverController object.
    *
    * @param \Drupal\webhook_receiver\WebhookReceiver $webhook_receiver
    *   An injected webhook_receiver service.
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
    *   An injected request stack.
+   * @param \Drupal\webhook_receiver\Payload\PayloadFactoryInterface $payload_factory
+   *   An injected request stack.
    */
-  public function __construct(WebhookReceiver $webhook_receiver, RequestStack $request_stack) {
+  public function __construct(WebhookReceiver $webhook_receiver, RequestStack $request_stack, PayloadFactoryInterface $payload_factory) {
     $this->webhookReceiver = $webhook_receiver;
     $this->requestStack = $request_stack;
+    $this->payloadFactory = $payload_factory;
   }
 
   /**
@@ -55,6 +67,7 @@ class WebhookReceiverController extends ControllerBase {
     return new static(
       $container->get('webhook_receiver'),
       $container->get('request_stack'),
+      $container->get('webhook_receiver.payload_factory'),
     );
   }
 
@@ -71,7 +84,7 @@ class WebhookReceiverController extends ControllerBase {
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    *   A response for output as JSON.
    */
-  public function process(string $plugin_id, string $token, bool $simulate = FALSE) {
+  public function process(string $plugin_id, string $token, bool $simulate) {
     $data = $this->webhookReceiver->process($plugin_id, $token, $simulate, $this->payload());
     $ret = new JsonResponse($data);
     if (!empty($data['code'])) {
@@ -83,10 +96,20 @@ class WebhookReceiverController extends ControllerBase {
   /**
    * Get the payload as a string.
    *
+   * @return \Drupal\webhook_receiver\Payload\PayloadInterface
+   *   The payload.
+   */
+  public function payload() : PayloadInterface {
+    return $this->payloadFactory->fromString($this->payloadString());
+  }
+
+  /**
+   * Get the payload as a string.
+   *
    * @return string
    *   The brute payload.
    */
-  public function payload() : string {
+  public function payloadString() : string {
     return $this->requestStack->getCurrentRequest()->getContent();
   }
 
