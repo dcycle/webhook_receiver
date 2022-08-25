@@ -122,6 +122,13 @@ class Payload implements PayloadInterface {
     if ($this->payloadString && !$ret) {
       $err = 'The payload string is not empty yet we could not decocde it with JSON. Is it valid JSON?';
       $this->errors[$err] = $err;
+      $ret = [];
+    }
+
+    if (!is_array($ret)) {
+      $debug = 'The payload string resolved to a non-array; this is not supported and it will be made into an array';
+      $this->debug[$debug] = $debug;
+      $ret = [$ret];
     }
 
     return $ret;

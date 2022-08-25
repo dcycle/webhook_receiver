@@ -22,8 +22,7 @@ services:
       - '@webhook_receiver.array_pathfinder'
   webhook_receiver.request_response_test:
     class: >-
-      Drupal\webhook_receiver\SelfTest\
-      RequestResponseTest
+      Drupal\webhook_receiver\SelfTest\RequestResponseTest
     arguments:
       - '@file_system'
       - '@webhook_receiver'
