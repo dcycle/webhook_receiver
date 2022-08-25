@@ -52,7 +52,7 @@ class DeferSelfTest {
     $this->setup();
     $this->assertByType('new', 4);
     $this->log('Running cron.');
-    $this->module->hookCron();
+    // $this->module->hookCron();
     $this->log('webhook_receiver_defer all tests complete!');
   }
 

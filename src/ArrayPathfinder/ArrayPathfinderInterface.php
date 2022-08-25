@@ -41,8 +41,6 @@ interface ArrayPathfinderInterface {
   /**
    * Validates a value from the callback.
    *
-   * The the path does not exist, return FALSE.
-   *
    * For example:
    * If the pathload is ['a' => ['b' => 'hello']], we will return TRUE.
    *
@@ -50,12 +48,14 @@ interface ArrayPathfinderInterface {
    *   An array to check.
    * @param array $path
    *   A path, for example ['a', 'b'].
+   * @param mixed $default
+   *   A default value to use if it does not exist.
    * @param callable $callback
    *   A callable to call on the value of 'b' ('hello' in this example).
    *
    * @return bool
    *   TRUE if this validates.
    */
-  public function validatePath(array $array, array $path, callable $callback) : bool;
+  public function validatePath(array $array, array $path, $default, callable $callback) : bool;
 
 }

@@ -109,17 +109,14 @@ class Payload implements PayloadInterface {
   /**
    * {@inheritdoc}
    */
-  public function validatePath(array $path, callable $callback) : bool {
-    return $this->arrayPathfinder->validatePath($this->toArray(), $path, $callback);
+  public function validatePath(array $path, $default, callable $callback) : bool {
+    return $this->arrayPathfinder->validatePath($this->toArray(), $path, $default, $callback);
   }
 
   /**
-   * Get this payload as an array.
-   *
-   * @return array
-   *   This payload as an array.
+   * {@inheritdoc}
    */
-  public function toArray() {
+  public function toArray() : array {
     $ret = Json::decode($this->payloadString);
 
     if ($this->payloadString && !$ret) {
@@ -131,10 +128,7 @@ class Payload implements PayloadInterface {
   }
 
   /**
-   * Update this payload from an array.
-   *
-   * @param array $array
-   *   A new array to override the payload.
+   * {@inheritdoc}
    */
   public function fromArray(array $array) {
     $this->payloadString = Json::encode($array);

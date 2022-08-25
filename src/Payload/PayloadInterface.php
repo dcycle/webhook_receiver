@@ -50,6 +50,22 @@ interface PayloadInterface {
   public function get(array $path, $default);
 
   /**
+   * Get this payload as an array.
+   *
+   * @return array
+   *   Payload as an array.
+   */
+  public function toArray() : array;
+
+  /**
+   * Replace this payload with an array.
+   *
+   * @param array $array
+   *   Payload as an array.
+   */
+  public function fromArray(array $array);
+
+  /**
    * Like ::get() for boolean values.
    */
   public function getBool(array $path, bool $default = FALSE) : bool;
@@ -69,13 +85,15 @@ interface PayloadInterface {
    *
    * @param array $path
    *   A path, for example ['a', 'b'].
+   * @param mixed $default
+   *   A default value to use.
    * @param callable $callback
    *   A callable to call on the value of 'b' ('hello' in this example).
    *
    * @return bool
    *   TRUE if this validates.
    */
-  public function validatePath(array $path, callable $callback) : bool;
+  public function validatePath(array $path, $default, callable $callback) : bool;
 
   /**
    * Unset a value in this payload.

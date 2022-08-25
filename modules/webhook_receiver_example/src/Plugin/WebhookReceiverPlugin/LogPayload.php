@@ -65,7 +65,7 @@ class LogPayload extends WebhookReceiverPluginBase implements ContainerFactoryPl
     // This demonstrates how you might validate that a payload is actually
     // usable by your plugin. If this passes, then the ::processPayloadArray()
     // method is called.
-    if (!$payload->validatePath([self::PAYLOAD_REQUIRED_KEY], function ($x) {
+    if (!$payload->validatePath([self::PAYLOAD_REQUIRED_KEY], '', function ($x) {
       return $x ? TRUE : FALSE;
     })) {
       $log->err('We are expecting the payload to contain the key "' . self::PAYLOAD_REQUIRED_KEY . '" and for it to be a non-empty string.');

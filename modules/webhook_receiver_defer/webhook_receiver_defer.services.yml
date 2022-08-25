@@ -4,6 +4,7 @@ services:
     class: Drupal\webhook_receiver_defer\SelfTest\DeferSelfTest
     arguments:
       - '@webhook_receiver_defer'
+      - '@webhook_receiver.payload_factory'
   webhook_receiver_defer.requirements:
     class: >-
       Drupal\webhook_receiver_defer\WebhookReceiverDeferRequirements\WebhookReceiverDeferRequirements

@@ -49,7 +49,7 @@ class LogPayloadTest extends TestCase {
       public function __construct($input) {
         $this->input = $input;
       }
-      public function validatePath(array $path, callable $callback) : bool {
+      public function validatePath(array $path, $default, callable $callback) : bool {
         if (!isset($this->input[$path[0]])) {
           return FALSE;
         }

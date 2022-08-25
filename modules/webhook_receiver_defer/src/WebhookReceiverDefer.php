@@ -130,7 +130,10 @@ class WebhookReceiverDefer {
       $simulate = $next[0]->simulate;
       $payload = $this->payloadFactory->fromString($next[0]->payload);
 
-      $payload->unset(['no-defer']);
+      // Set no-defer to avoid infinite loops.
+      $payload_array = $payload->toArray();
+      $payload_array['no-defer'] = TRUE;
+      $payload->fromArray($payload_array);
 
       $result = $this->webhookReceiver->process($plugin_id, $token, $simulate, $payload);
 
@@ -155,7 +158,7 @@ class WebhookReceiverDefer {
     $this->connection->update(self::TABLE)
       ->fields([
         'status' => $code,
-        'result' => JSON::encode($result),
+        'response' => JSON::encode($result),
       ])
       ->condition('uuid', $uuid)
       ->execute();
