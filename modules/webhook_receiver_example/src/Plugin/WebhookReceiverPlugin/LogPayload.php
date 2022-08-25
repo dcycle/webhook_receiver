@@ -63,7 +63,7 @@ class LogPayload extends WebhookReceiverPluginBase implements ContainerFactoryPl
    */
   public function validatePayload(PayloadInterface $payload, WebhookReceiverLogInterface $log) : bool {
     // This demonstrates how you might validate that a payload is actually
-    // usable by your plugin. If this passes, then the ::processPayloadArray()
+    // usable by your plugin. If this passes, then the ::processPayload()
     // method is called.
     if (!$payload->validatePath([self::PAYLOAD_REQUIRED_KEY], '', function ($x) {
       return $x ? TRUE : FALSE;
@@ -81,12 +81,12 @@ class LogPayload extends WebhookReceiverPluginBase implements ContainerFactoryPl
   /**
    * {@inheritdoc}
    */
-  public function processPayloadArray(PayloadInterface $payload, WebhookReceiverLogInterface $log, bool $simulate) {
-    if ($payload[self::PAYLOAD_REQUIRED_KEY] == self::VALUE_TO_SIMULATE_EXCEPTION_ON_PROCESS) {
+  public function processPayload(PayloadInterface $payload, WebhookReceiverLogInterface $log, bool $simulate) {
+    if ($payload->getString([self::PAYLOAD_REQUIRED_KEY]) == self::VALUE_TO_SIMULATE_EXCEPTION_ON_PROCESS) {
       throw new \Exception('Simulating exception because the value of key ' . self::PAYLOAD_REQUIRED_KEY . ' is ' . self::VALUE_TO_SIMULATE_EXCEPTION_ON_PROCESS);
     }
 
-    $notice = "The payload's '" . self::PAYLOAD_REQUIRED_KEY . "' key is: " . $payload[self::PAYLOAD_REQUIRED_KEY];
+    $notice = "The payload's '" . self::PAYLOAD_REQUIRED_KEY . "' key is: " . $payload->getString([self::PAYLOAD_REQUIRED_KEY]);
 
     if ($simulate) {
       $log->debug('We are simulating the action so we are not actually logging anything in the watchdog. If we were not simulating we would log:');

@@ -137,9 +137,9 @@ class WebhookReceiverPluginCollection implements WebhookReceiverPluginInterface 
   /**
    * {@inheritdoc}
    */
-  public function processPayloadArray(PayloadInterface $payload, WebhookReceiverLogInterface $log, bool $simulate) {
+  public function processPayload(PayloadInterface $payload, WebhookReceiverLogInterface $log, bool $simulate) {
     foreach ($this->plugins() as $plugin) {
-      $plugin->processPayloadArray($payload, $log, $simulate);
+      $plugin->processPayload($payload, $log, $simulate);
     }
   }
 

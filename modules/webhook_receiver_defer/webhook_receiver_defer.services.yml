@@ -5,6 +5,7 @@ services:
     arguments:
       - '@webhook_receiver_defer'
       - '@webhook_receiver.payload_factory'
+      - '@database'
   webhook_receiver_defer.requirements:
     class: >-
       Drupal\webhook_receiver_defer\WebhookReceiverDeferRequirements\WebhookReceiverDeferRequirements

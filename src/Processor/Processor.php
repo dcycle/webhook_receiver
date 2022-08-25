@@ -170,11 +170,11 @@ class Processor implements ProcessorInterface {
    *   A return array which will be stringified and client-facing.
    */
   public function processNow(WebhookReceiver $app, string $plugin_id, WebhookReceiverLogInterface $log, bool $simulate, PayloadInterface $payload, array &$ret) {
-    if ($app->plugins()->byId($plugin_id)->validatePayload($payload['payload'], $log)) {
+    if ($app->plugins()->byId($plugin_id)->validatePayload($payload, $log)) {
       $log->debug('Payload is valid. Moving on to process request.');
       $app->plugins()
         ->byId($plugin_id)
-        ->processPayloadArray($payload['payload'], $log, $simulate);
+        ->processPayload($payload, $log, $simulate);
       $ret['code'] = self::OK;
     }
     else {

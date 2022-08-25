@@ -24,7 +24,7 @@ abstract class WebhookReceiverPluginBase extends PluginBase implements WebhookRe
   /**
    * {@inheritdoc}
    */
-  public function processPayloadArray(PayloadInterface $payload, WebhookReceiverLogInterface $log, bool $simulate) {
+  public function processPayload(PayloadInterface $payload, WebhookReceiverLogInterface $log, bool $simulate) {
     // Do nothing.
   }
 

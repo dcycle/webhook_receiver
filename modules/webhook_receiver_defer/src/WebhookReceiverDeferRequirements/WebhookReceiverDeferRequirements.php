@@ -72,10 +72,25 @@ class WebhookReceiverDeferRequirements {
     $ret_array = [];
 
     foreach ($all as $by_type) {
-      $ret_array[] = $by_type->status . ': ' . $by_type->count;
+      $ret_array[] = $this->statusHumanReadable($by_type->status) . ': ' . $by_type->count;
     }
 
     return implode(', ', $ret_array);
+  }
+
+  /**
+   * Get a status in a human-readable format.
+   *
+   * @param string $status
+   *   The status.
+   *
+   * @return string
+   *   The status in a human-readable format.
+   */
+  public function statusHumanReadable(string $status) : string {
+    return is_numeric($status) ? $this->t('Processed with result code @c', [
+      '@c' => $status,
+    ]) : $status;
   }
 
 }
