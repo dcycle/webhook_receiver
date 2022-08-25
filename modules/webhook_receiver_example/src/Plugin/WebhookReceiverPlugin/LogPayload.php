@@ -7,6 +7,7 @@ use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\webhook_receiver\Payload\PayloadInterface;
 
 /**
  * Very simple example of the webhook receiver module which logs the payload.
@@ -60,23 +61,17 @@ class LogPayload extends WebhookReceiverPluginBase implements ContainerFactoryPl
   /**
    * {@inheritdoc}
    */
-  public function validatePayloadArray(array $payload, WebhookReceiverLogInterface $log) : bool {
+  public function validatePayload(PayloadInterface $payload, WebhookReceiverLogInterface $log) : bool {
     // This demonstrates how you might validate that a payload is actually
     // usable by your plugin. If this passes, then the ::processPayloadArray()
     // method is called.
-    if (!isset($payload[self::PAYLOAD_REQUIRED_KEY])) {
-      $log->err('We are expecting the payload to contain the key "' . self::PAYLOAD_REQUIRED_KEY . '".');
+    if (!$payload->validatePath([self::PAYLOAD_REQUIRED_KEY], function ($x) {
+      return $x ? TRUE : FALSE;
+    })) {
+      $log->err('We are expecting the payload to contain the key "' . self::PAYLOAD_REQUIRED_KEY . '" and for it to be a non-empty string.');
       return FALSE;
     }
-    if (!$payload[self::PAYLOAD_REQUIRED_KEY]) {
-      $log->err('The payload contains the key "' . self::PAYLOAD_REQUIRED_KEY . '" but it is empty.');
-      return FALSE;
-    }
-    if (!is_string($payload[self::PAYLOAD_REQUIRED_KEY])) {
-      $log->err('The payload contains the key "' . self::PAYLOAD_REQUIRED_KEY . '" but it is not a string.');
-      return FALSE;
-    }
-    if ($payload[self::PAYLOAD_REQUIRED_KEY] == self::VALUE_TO_SIMULATE_EXCEPTION_ON_VALIDATE) {
+    if ($payload->getString([self::PAYLOAD_REQUIRED_KEY]) == self::VALUE_TO_SIMULATE_EXCEPTION_ON_VALIDATE) {
       throw new \Exception('Simulating exception because the value of key ' . self::PAYLOAD_REQUIRED_KEY . ' is ' . self::VALUE_TO_SIMULATE_EXCEPTION_ON_VALIDATE);
     }
     $log->debug('The payload is valid.');
@@ -86,7 +81,7 @@ class LogPayload extends WebhookReceiverPluginBase implements ContainerFactoryPl
   /**
    * {@inheritdoc}
    */
-  public function processPayloadArray(array $payload, WebhookReceiverLogInterface $log, bool $simulate) {
+  public function processPayloadArray(PayloadInterface $payload, WebhookReceiverLogInterface $log, bool $simulate) {
     if ($payload[self::PAYLOAD_REQUIRED_KEY] == self::VALUE_TO_SIMULATE_EXCEPTION_ON_PROCESS) {
       throw new \Exception('Simulating exception because the value of key ' . self::PAYLOAD_REQUIRED_KEY . ' is ' . self::VALUE_TO_SIMULATE_EXCEPTION_ON_PROCESS);
     }

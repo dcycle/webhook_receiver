@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * @file
+ * Install hooks.
+ */
+
+/**
+ * Implements hook_schema().
+ *
+ * Defines the database tables used by this module.
+ *
+ * @see hook_schema()
+ *
+ * @ingroup dbtng_example
+ */
+function webhook_receiver_defer_schema() {
+  $schema['webhook_receiver_defer'] = [
+    'description' => 'Remember webhook calls to defer processing.',
+    'fields' => [
+      'cid' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique call ID.',
+      ],
+      'uuid' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Uuid of the call.',
+      ],
+      'status' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Status of the call.',
+      ],
+      'plugin_id' => [
+        'type' => 'varchar',
+        'length' => 2048,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The plugin ID.',
+      ],
+      'payload' => [
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+        'description' => 'The payload.',
+      ],
+      'response' => [
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+        'description' => 'The response.',
+      ],
+      'time' => [
+        'type' => 'int',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'The request timestamp.',
+      ],
+      'simulate' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'description' => 'Whether to simulate the request.',
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['cid'],
+    'indexes' => [
+      'status' => ['status'],
+      'uuid' => ['uuid'],
+      'time' => ['time'],
+    ],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function webhook_receiver_defer_requirements(string $phase) : array {
+  // Make sure the phase is runtime, otherwise (during installation for
+  // example) the webhook_receiver.requirements service will not be available.
+  if ($phase != 'runtime') {
+    // If ther are any non-runtime requirements, we do not have access
+    // to the webhook_receiver.requirements, so we would define them here.
+    // (There are none at the time of this writing.)
+    return [];
+  }
+  return \Drupal::service('webhook_receiver_defer.requirements')
+    ->hookRequirements($phase);
+}

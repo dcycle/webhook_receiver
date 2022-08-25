@@ -1,1 +1,1 @@
-{"code":500,"time":"SYSTEM_TIME","log":{"errors":[{"message":"An error occurred during processing. Find the following id in the Drupal logs for details","id":"THIS-IS-A-UUID"}],"debug":[]},"access":true,"continue":true}
+{"code":500,"time":"SYSTEM_TIME","log":{"errors":[{"message":"An error occurred during processing. Find the following id in the Drupal logs for details","id":"THIS-IS-A-UUID"}],"debug":[]},"access":false,"continue":true}

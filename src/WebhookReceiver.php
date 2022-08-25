@@ -3,8 +3,9 @@
 namespace Drupal\webhook_receiver;
 
 use Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecurity;
-use Drupal\webhook_receiver\WebhookReceiverProcessor\WebhookReceiverProcessorInterface;
+use Drupal\webhook_receiver\Processor\ProcessorInterface;
 use Drupal\Component\Serialization\Json;
+use Drupal\webhook_receiver\Payload\PayloadInterface;
 
 /**
  * WebhookReceiver singleton. Use \Drupal::service('webhook_receiver').
@@ -21,7 +22,7 @@ class WebhookReceiver {
   /**
    * The injected webhook receiver request processor.
    *
-   * @var \Drupal\webhook_receiver\WebhookReceiverProcessor\WebhookReceiverProcessorInterface
+   * @var \Drupal\webhook_receiver\Processor\ProcessorInterface
    */
   protected $processor;
 
@@ -40,10 +41,10 @@ class WebhookReceiver {
    *
    * @param \Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecurity $webhookReceiverSecurity
    *   An injected webhook receiver security service.
-   * @param \Drupal\webhook_receiver\WebhookReceiverProcessor\WebhookReceiverProcessorInterface $processor
+   * @param \Drupal\webhook_receiver\Processor\ProcessorInterface $processor
    *   An injected webhook receiver processor service.
    */
-  public function __construct(WebhookReceiverSecurity $webhookReceiverSecurity, WebhookReceiverProcessorInterface $processor) {
+  public function __construct(WebhookReceiverSecurity $webhookReceiverSecurity, ProcessorInterface $processor) {
     $this->webhookReceiverSecurity = $webhookReceiverSecurity;
     $this->processor = $processor;
   }
@@ -72,15 +73,14 @@ class WebhookReceiver {
    *   A token.
    * @param bool $simulate
    *   Whether to simulate the action.
-   * @param string $payload
-   *   The payload as a string.
+   * @param \Drupal\webhook_receiver\Payload\PayloadInterface $payload
+   *   The payload.
    *
    * @return array
    *   A response for output as JSON.
    */
-  public function process(string $plugin_id, string $token, bool $simulate, string $payload) : array {
-    $payload_array = $this->payload($payload);
-    return $this->processor->process($this, $plugin_id, $token, $simulate, $payload_array);
+  public function process(string $plugin_id, string $token, bool $simulate, PayloadInterface $payload) : array {
+    return $this->processor->process($this, $plugin_id, $token, $simulate, $payload);
   }
 
   /**
@@ -137,7 +137,7 @@ class WebhookReceiver {
       $ret[$id] = [
         'plugin_id' => $id,
         'token' => $token,
-        'webhook_path' => '/' . $id . '/' . $token,
+        'webhook_path' => '/webhook-receiver/' . $id . '/' . $token,
       ];
     }
 

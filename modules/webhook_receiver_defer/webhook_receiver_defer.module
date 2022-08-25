@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Runtime hooks.
+ */
+
+// @codingStandardsIgnoreStart
+use Drupal\webhook_receiver_defer\WebhookReceiverDefer;
+// @codingStandardsIgnoreEnd
+
+/**
+ * Quick access to the webhook_receiver_defer service, useful for debugging.
+ *
+ * @return \Drupal\webhook_receiver_defer\WebhookReceiverDefer
+ *   The WebhookReceiverDefer service.
+ */
+function webhook_receiver_defer() : WebhookReceiverDefer {
+  return \Drupal::service('webhook_receiver_defer');
+}
+
+/**
+ * Implements hook_cron().
+ */
+function webhook_receiver_defer_cron() {
+  webhook_receiver_defer()->hookCron();
+}

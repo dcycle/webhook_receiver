@@ -1,0 +1,19 @@
+---
+services:
+  webhook_receiver_defer.selftest:
+    class: Drupal\webhook_receiver_defer\SelfTest\DeferSelfTest
+    arguments:
+      - '@webhook_receiver_defer'
+  webhook_receiver_defer.requirements:
+    class: >-
+      Drupal\webhook_receiver_defer\WebhookReceiverDeferRequirements\WebhookReceiverDeferRequirements
+    arguments:
+      - '@webhook_receiver_defer'
+  webhook_receiver_defer:
+    class: Drupal\webhook_receiver_defer\WebhookReceiverDefer
+    arguments:
+      - '@webhook_receiver'
+      - '@uuid'
+      - '@database'
+      - '@datetime.time'
+      - '@webhook_receiver.payload_factory'

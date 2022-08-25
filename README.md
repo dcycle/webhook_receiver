@@ -3,7 +3,7 @@
 Webhook Receiver
 =====
 
-Allows Drupal sites to receive webhooks. Webhooks are posts to a specific path on your website used for integration with third party services. The content of the posts is called a "payload".
+Allows Drupal sites to receive webhooks with JSON payloads (non-JSON payloads are not supported). Webhooks are posts to a specific path on your website used for integration with third party services. The content of the posts is called a "payload". [More on webhooks on Wikipedia](https://en.wikipedia.org/wiki/Webhook).
 
 For example, if you use [Eventbrite](https://www.eventbrite.com) to manage your events, you can set Eventbrite up to inform your site of any changes to events. This is done through webhooks.
 
@@ -29,7 +29,7 @@ We can now confirm that, for now, no webhooks are defined:
 
     drush ev 'print_r(webhook_receiver()->webhooks())'
 
-This will give you an empty array. This is because there are no webhooks.
+This will give you an empty array. This is because there are no active modules defining webhooks.
 
 So how to define a webhook?
 -----
@@ -57,6 +57,15 @@ Now get the webhooks:
     )
 
 In your case, a unique token will appear instead of YOUR_SECURITY_TOKEN. That is meant to secure your webhook and make sure only authorized sources can access it.
+
+Other security methods
+-----
+
+We do not recommend relying only on the security token in the URL, but that the only security technique this module offers.
+
+Concretely, you would register your webhook URL to a third-party application, and your webhook URL would contain your security token. This means that anyone with access to the list of webhook endpoints on the third party could have access to your webhook URL and send malicious requests.
+
+We recommend you also rely on [other techniques as described in this Wikipedia article](https://en.wikipedia.org/wiki/Webhook#Authenticating_the_webhook_notification), although these are outside the scope of this module.
 
 Calling the webhook
 -----
@@ -136,6 +145,70 @@ And our webhook does what it's meant to do (as this is just an example): it logs
     {"code":500,"time":1661192152,"log":{"errors":[{"message":"An error occurred during processing. Find the following id in the Drupal logs for details","id":"2a9579e8-1e3a-495b-adc8-f0706769a81f"}],"debug":[]},"access":true,"continue":true}%
 
 This allows you to search for the error id which will be in the watchdog.
+
+Deferring processing of webhooks
+-----
+
+Certain cloud services such as Eventbrite will mark calls to webhooks as failed if they take more than a few seconds. It is therefore your site's responsibility to send the third-party service a 200 success code when a webhook is called almost immediately.
+
+If actually _processing_ a webhook call takes longer than that, this module allows you to defer processing using the included webhook_receiver_defer module, and do the actual processing in cron. Here is how it works.
+
+    drush en -y webhook_receiver_defer
+
+You can now try this by calling a few webhooks:
+
+    curl -i -X POST \
+    http://example.com/webhook-receiver/webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "This must be set!": "This should be deferred"
+    }'
+
+    curl -i -X POST \
+    http://example.com/webhook-receiver/webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN/simulate \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "This must be set!": "This should be deferred"
+    }'
+
+    curl -i -X POST \
+    http://example.com/webhook-receiver/webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "This must be set!": "So should this"
+    }'
+
+    curl -i -X POST \
+    http://example.com/webhook-receiver/webhook_receiver_example_log_payload/YOUR_SECURITY_TOKEN \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "This should fail": "because of a missing This must be set! key"
+    }'
+
+Note that if your token is wrong, or if the payload is not valid JSON, we will fail and not attempt to defer execution.
+
+If you visit /admin/reports/status on the website you'll see:
+
+    webhook_receiver_defer database usage
+    new: 3
+
+This tells you that three requests have been queued but not yet run.
+
+You can also get this information programmatically by running:
+
+    \Drupal::service('webhook_receiver_defer')->countByType();
+
+You can manually process a single request by running:
+
+    \Drupal::service('webhook_receiver_defer')->countByType();
+
+
+
+
 
 Local development and testing
 -----

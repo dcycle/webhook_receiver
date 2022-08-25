@@ -5,6 +5,7 @@ namespace Drupal\Tests\webhook_receiver_example\Unit\Plugin\WebhookReceiverPlugi
 use Drupal\webhook_receiver_example\Plugin\WebhookReceiverPlugin\LogPayload;
 use PHPUnit\Framework\TestCase;
 use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLog;
+use Drupal\webhook_receiver\Payload\Payload;
 
 /**
  * Test LogPayload.
@@ -14,7 +15,7 @@ use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLog;
 class LogPayloadTest extends TestCase {
 
   /**
-   * Test for validatePayloadArray().
+   * Test for validatePayload().
    *
    * @param string $message
    *   The test message.
@@ -30,10 +31,10 @@ class LogPayloadTest extends TestCase {
    *   The exception class expected or an empty string if no exception is
    *   expected.
    *
-   * @cover ::validatePayloadArray
-   * @dataProvider providerValidatePayloadArray
+   * @cover ::validatePayload
+   * @dataProvider providervalidatePayload
    */
-  public function testValidatePayloadArray(string $message, array $input, array $expected_errors, array $expected_debug_messages, bool $expected_result, string $exception) {
+  public function testvalidatePayload(string $message, array $input, array $expected_errors, array $expected_debug_messages, bool $expected_result, string $exception) {
     $object = $this->getMockBuilder(LogPayload::class)
       ->setMethods(NULL)
       ->disableOriginalConstructor()
@@ -43,7 +44,22 @@ class LogPayloadTest extends TestCase {
       $this->expectException($exception);
     }
 
-    $output = $object->validatePayloadArray($input, $log = new WebhookReceiverLog());
+    // @codingStandardsIgnoreStart
+    $output = $object->validatePayload(new class($input) extends Payload {
+      public function __construct($input) {
+        $this->input = $input;
+      }
+      public function validatePath(array $path, callable $callback) : bool {
+        if (!isset($this->input[$path[0]])) {
+          return FALSE;
+        }
+        return $callback($this->input[$path[0]]);
+      }
+      public function getString(array $path, string $default = '') : string {
+        return $this->input[$path[0]];
+      }
+    }, $log = new WebhookReceiverLog());
+    // @codingStandardsIgnoreEnd
 
     if ($output != $expected_result) {
       print_r([
@@ -55,14 +71,14 @@ class LogPayloadTest extends TestCase {
     if ($log->toArray()['debug'] != $expected_debug_messages) {
       print_r([
         'message' => $output,
-        'debug messages' => $log->_debug,
+        'debug messages' => $log->toArray()['errors'],
         'expected' => $expected_debug_messages,
       ]);
     }
     if ($log->toArray()['errors'] != $expected_errors) {
       print_r([
         'message' => $output,
-        'errors' => $log->_err,
+        'errors' => $log->toArray()['errors'],
         'expected' => $expected_errors,
       ]);
     }
@@ -73,15 +89,15 @@ class LogPayloadTest extends TestCase {
   }
 
   /**
-   * Provider for testValidatePayloadArray().
+   * Provider for testvalidatePayload().
    */
-  public function providerValidatePayloadArray() {
+  public function providervalidatePayload() {
     return [
       [
         'message' => 'Required key does not exist',
         'input' => [],
         'expected errors' => [
-          'We are expecting the payload to contain the key "' . LogPayload::PAYLOAD_REQUIRED_KEY . '".',
+          'We are expecting the payload to contain the key "' . LogPayload::PAYLOAD_REQUIRED_KEY . '" and for it to be a non-empty string.',
         ],
         'expected_debug_messages' => [],
         'expected result' => FALSE,
@@ -93,7 +109,7 @@ class LogPayloadTest extends TestCase {
           LogPayload::PAYLOAD_REQUIRED_KEY => '',
         ],
         'expected errors' => [
-          'The payload contains the key "' . LogPayload::PAYLOAD_REQUIRED_KEY . '" but it is empty.',
+          'We are expecting the payload to contain the key "' . LogPayload::PAYLOAD_REQUIRED_KEY . '" and for it to be a non-empty string.',
         ],
         'expected_debug_messages' => [],
         'expected result' => FALSE,
@@ -106,12 +122,10 @@ class LogPayloadTest extends TestCase {
             'this is an array, not a string :(',
           ],
         ],
-        'expected errors' => [
-          'The payload contains the key "' . LogPayload::PAYLOAD_REQUIRED_KEY . '" but it is not a string.',
-        ],
+        'expected errors' => [],
         'expected_debug_messages' => [],
         'expected result' => FALSE,
-        'exception' => '',
+        'exception' => '\Throwable',
       ],
       [
         'message' => 'Required key is a string (happy path)',
