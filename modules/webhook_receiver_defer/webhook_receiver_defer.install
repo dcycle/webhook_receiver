@@ -11,8 +11,6 @@
  * Defines the database tables used by this module.
  *
  * @see hook_schema()
- *
- * @ingroup dbtng_example
  */
 function webhook_receiver_defer_schema() {
   $schema['webhook_receiver_defer'] = [
