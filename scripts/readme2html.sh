@@ -18,3 +18,10 @@ docker run --rm -v "$(pwd):/app/code" \
 # systems, perl seems a good alternative, see
 # https://stackoverflow.com/a/4247319/1207752
 perl -i -pe's/\)-&gt;/)->/g' README.html
+perl -i -pe's/ =&gt; / => /g' README.html
+perl -i -pe"s/&#39;/'/g" README.html
+perl -i -pe's/&quot;/"/g' README.html
+
+echo " --- "
+echo " Please make sure you remove the line break between h3 and id everywhere in the document. I can't figure out how to automate that."
+echo " --- "
