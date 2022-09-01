@@ -115,6 +115,13 @@ class WebhookReceiver {
   }
 
   /**
+   * Print test path, used in ./scripts/post-test.sh.
+   */
+  public function printTestPath() {
+    print_r(webhook_receiver()->webhooks()['webhook_receiver_example_log_payload']['webhook_path']);
+  }
+
+  /**
    * Get all available webhooks.
    *
    * If there are none, enable webhook_receiver_example or your own modules.

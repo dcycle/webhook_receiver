@@ -84,7 +84,7 @@ class WebhookReceiverController extends ControllerBase {
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    *   A response for output as JSON.
    */
-  public function process(string $plugin_id, string $token, bool $simulate) {
+  public function process(string $plugin_id, string $token, bool $simulate = FALSE) {
     $data = $this->webhookReceiver->process($plugin_id, $token, $simulate, $this->payload());
     $ret = new JsonResponse($data);
     if (!empty($data['code'])) {
