@@ -19,6 +19,10 @@ Example
 
 On its own, the webhook_receiver does not do anything. It needs extension classes to actually do something when webhooks are called.
 
+One module which uses this is:
+
+* [Eventbrite One-Way Sync](http://drupal.org/project/eventbrite_one_way_sync)
+
 Let's look at an example:
 
 Start by enabling webhook_receiver
@@ -61,7 +65,7 @@ In your case, a unique token will appear instead of YOUR_SECURITY_TOKEN. That is
 Other security methods
 -----
 
-We do not recommend relying only on the security token in the URL, but that the only security technique this module offers.
+We do not recommend relying only on the security token in the URL, but that is the only security technique this module offers.
 
 Concretely, you would register your webhook URL to a third-party application, and your webhook URL would contain your security token. This means that anyone with access to the list of webhook endpoints on the third party could have access to your webhook URL and send malicious requests.
 
@@ -203,13 +207,13 @@ The requests are all processed on cron and they are kept in the database indefin
 Local development and testing
 -----
 
-During local development, you can, in your module, put expected request-reponse pairs in a directory request-response-test in your module.
+During local development, you can, in your module, put expected request-reponse pairs in a directory called ./request-response-test in your module.
 
 You can then run these tests using:
 
     \Drupal::service('webhook_receiver.request_response_test')->run('webhook_receiver_example');
 
-Replacing webhook_receiver_example with your own module's name. (If you enable webhook_receiver_example and run the above comment, you will see the tests with the included webhook_receiver_example module.)
+Replacing webhook_receiver_example with your own module's name. (If you enable webhook_receiver_example and run the above code, you will see the tests with the included webhook_receiver_example module.)
 
 Similar modules
 -----
