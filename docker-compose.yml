@@ -1,18 +1,30 @@
 ---
 # This file is used by developers who use ./scripts/deploy.sh to set up a local
 # development environment to help with development this module.
-version: '2'
+version: '3'
 
 services:
   drupal:
-    image: dcycle/drupal:9php8
+    image: dummy_image_required
     volumes:
       - ".:/var/www/html/modules/custom/webhook_receiver"
+    working_dir: /var/www/html
+
+  webserver:
+    build:
+      context: .
+      dockerfile: Dummy_Dockerfile_required
     ports:
       - "80"
     links:
-      - mysql:mysql
-    working_dir: /var/www/html
+      # This seems to be required as per
+      # https://stackoverflow.com/a/48722140/1207752, even though in most
+      # cases eschewing this is not a problem. Without this, the
+      # webserver container might not see the Drupal container for a
+      # split second when everything is being spun up, resulting in a fatal
+      # error and the webserver container to exit, and requiring a restart
+      # of the container.
+      - drupal
 
   mysql:
     image: mariadb
