@@ -1,0 +1,13 @@
+---
+# This file is used by developers who use ./scripts/deploy.sh to set up a local
+# development environment to help with development this module.
+version: '3'
+
+services:
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx-9
+
+  drupal:
+    image: dcycle/drupal:9php8-fpm-alpine

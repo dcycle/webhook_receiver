@@ -5,7 +5,7 @@
 set -e
 
 WEBPATH=$(docker-compose exec -T drupal /bin/bash -c "drush ev 'webhook_receiver()->printTestPath();'")
-DOMAIN=$(docker-compose port drupal 80)
+DOMAIN=$(docker-compose port webserver 80)
 
 FULL=http://"$DOMAIN""$WEBPATH"
 
