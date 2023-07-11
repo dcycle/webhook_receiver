@@ -2,8 +2,8 @@
 
 namespace Drupal\webhook_receiver\Payload;
 
-use Drupal\webhook_receiver\ArrayPathfinder\ArrayPathfinderInterface;
 use Drupal\Component\Serialization\Json;
+use Drupal\webhook_receiver\ArrayPathfinder\ArrayPathfinderInterface;
 
 /**
  * Represents a payload, which is received by the webhook caller.

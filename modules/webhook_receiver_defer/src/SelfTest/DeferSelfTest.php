@@ -2,10 +2,10 @@
 
 namespace Drupal\webhook_receiver_defer\SelfTest;
 
-use Drupal\webhook_receiver_defer\WebhookReceiverDefer;
-use Drupal\webhook_receiver\SelfTest\SelfTestLogTrait;
-use Drupal\webhook_receiver\Payload\PayloadFactoryInterface;
 use Drupal\Core\Database\Connection;
+use Drupal\webhook_receiver\Payload\PayloadFactoryInterface;
+use Drupal\webhook_receiver\SelfTest\SelfTestLogTrait;
+use Drupal\webhook_receiver_defer\WebhookReceiverDefer;
 
 /**
  * Run self-tests on the module. These are destructive.

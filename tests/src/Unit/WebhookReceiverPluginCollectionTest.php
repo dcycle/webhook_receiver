@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\webhook_receiver\Unit;
 
+use Drupal\webhook_receiver\WebhookReceiverPluginBase;
 use Drupal\webhook_receiver\WebhookReceiverPluginCollection;
 use PHPUnit\Framework\TestCase;
-use Drupal\webhook_receiver\WebhookReceiverPluginBase;
 
 /**
  * Test WebhookReceiverPluginCollection.

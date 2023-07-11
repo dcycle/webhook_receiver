@@ -2,8 +2,8 @@
 
 namespace Drupal\webhook_receiver\WebhookReceiverActivityLog;
 
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Component\Uuid\UuidInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Utility\Error;
 
 /**

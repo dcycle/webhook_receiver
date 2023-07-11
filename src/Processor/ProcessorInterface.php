@@ -2,8 +2,8 @@
 
 namespace Drupal\webhook_receiver\Processor;
 
-use Drupal\webhook_receiver\WebhookReceiver;
 use Drupal\webhook_receiver\Payload\PayloadInterface;
+use Drupal\webhook_receiver\WebhookReceiver;
 
 /**
  * Processor for a request.

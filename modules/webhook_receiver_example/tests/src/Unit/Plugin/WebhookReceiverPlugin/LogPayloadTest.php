@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\webhook_receiver_example\Unit\Plugin\WebhookReceiverPlugin;
 
+use Drupal\webhook_receiver\Payload\Payload;
+use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLog;
 use Drupal\webhook_receiver_example\Plugin\WebhookReceiverPlugin\LogPayload;
 use PHPUnit\Framework\TestCase;
-use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLog;
-use Drupal\webhook_receiver\Payload\Payload;
 
 /**
  * Test LogPayload.

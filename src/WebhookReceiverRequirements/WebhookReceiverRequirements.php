@@ -2,8 +2,8 @@
 
 namespace Drupal\webhook_receiver\WebhookReceiverRequirements;
 
-use Drupal\webhook_receiver\WebhookReceiver;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\webhook_receiver\WebhookReceiver;
 
 /**
  * Check requirements and provide status for this module.

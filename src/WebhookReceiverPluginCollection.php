@@ -2,10 +2,10 @@
 
 namespace Drupal\webhook_receiver;
 
-use Drupal\webhook_receiver\Utilities\Singleton;
 use Drupal\webhook_receiver\Payload\PayloadInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Drupal\webhook_receiver\Utilities\Singleton;
 use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Abstraction around a collection of plugins.

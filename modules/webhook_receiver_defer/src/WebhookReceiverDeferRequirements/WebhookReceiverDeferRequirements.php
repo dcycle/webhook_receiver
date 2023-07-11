@@ -2,8 +2,8 @@
 
 namespace Drupal\webhook_receiver_defer\WebhookReceiverDeferRequirements;
 
-use Drupal\webhook_receiver_defer\WebhookReceiverDefer;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\webhook_receiver_defer\WebhookReceiverDefer;
 
 /**
  * Check requirements and provide status for this module.

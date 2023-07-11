@@ -2,8 +2,8 @@
 
 namespace Drupal\webhook_receiver;
 
-use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 use Drupal\webhook_receiver\Payload\PayloadInterface;
+use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 
 /**
  * An interface for all WebhookReceiverPlugin type plugins.

@@ -3,9 +3,9 @@
 namespace Drupal\webhook_receiver\Plugin\WebhookReceiverPlugin;
 
 use Drupal\webhook_receiver\Payload\PayloadInterface;
-use Drupal\webhook_receiver\WebhookReceiverPluginBase;
-use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 use Drupal\webhook_receiver\WebhookReceiver;
+use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
+use Drupal\webhook_receiver\WebhookReceiverPluginBase;
 
 /**
  * Checks the token for all webhooks.

@@ -3,8 +3,8 @@
 namespace Drupal\webhook_receiver\WebhookReceiverSecurity;
 
 use Drupal\Component\Utility\Crypt;
-use Drupal\Core\State\State;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\State\State;
 
 /**
  * Manage tokens for webhooks.

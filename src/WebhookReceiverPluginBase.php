@@ -3,8 +3,8 @@
 namespace Drupal\webhook_receiver;
 
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 use Drupal\webhook_receiver\Payload\PayloadInterface;
+use Drupal\webhook_receiver\WebhookReceiverLog\WebhookReceiverLogInterface;
 
 /**
  * A base class to help developers implement WebhookReceiverPlugin objects.
