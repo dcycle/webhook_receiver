@@ -7,7 +7,7 @@ webhook_receiver.process:
   requirements:
     # Anyone can access webhooks. We will perform access logic and token
     # checking at WebhookReceiver::process().
-    _permission: 'access content'
+    _access: 'TRUE'
 webhook_receiver.process.simulate:
   path: '/webhook-receiver/{plugin_id}/{token}/simulate'
   methods: [POST]
@@ -16,4 +16,4 @@ webhook_receiver.process.simulate:
   requirements:
     # Anyone can access webhooks. We will perform access logic and token
     # checking at WebhookReceiver::process().
-    _permission: 'access content'
+    _access: 'TRUE'
