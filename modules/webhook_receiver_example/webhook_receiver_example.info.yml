@@ -3,7 +3,7 @@ name: Webhook Receiver Example
 type: module
 description: >-
   Provides an example on how the Webhook Receiver module works. See ./README.md.
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^10 || ^11
 php: '8.x'
 dependencies:
   - webhook_receiver:webhook_receiver

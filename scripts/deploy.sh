@@ -6,8 +6,8 @@
 #
 set -e
 
-if [ "$1" != "9" ] && [ "$1" != "10" ]; then
-  >&2 echo "Please specify 9 or 10"
+if [ "$1" != "11" ] && [ "$1" != "10" ]; then
+  >&2 echo "Please specify 11 or 10"
   exit 1;
 fi
 

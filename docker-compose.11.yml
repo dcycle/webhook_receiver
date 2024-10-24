@@ -7,7 +7,7 @@ services:
   webserver:
     build:
       context: .
-      dockerfile: Dockerfile-nginx-9
+      dockerfile: Dockerfile-nginx-11
 
   drupal:
-    image: dcycle/drupal:9php8-fpm-alpine
+    image: dcycle/drupal:11
