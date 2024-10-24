@@ -2,4 +2,4 @@
 FROM nginx:alpine
 
 COPY docker-resources/nginx/default.conf /etc/nginx/conf.d/
-COPY --from=dcycle/drupal:9php8-fpm-alpine /var/www/html /var/www/html
+COPY --from=dcycle/drupal:11 /var/www/html /var/www/html
