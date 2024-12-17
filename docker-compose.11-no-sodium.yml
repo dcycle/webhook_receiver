@@ -1,0 +1,15 @@
+---
+# This file is used by developers who use ./scripts/deploy.sh to set up a local
+# development environment to help with development this module.
+version: '3'
+
+services:
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx-11
+
+  drupal:
+    build:
+      context: .
+      dockerfile: Dockerfile-drupal11-no-sodium

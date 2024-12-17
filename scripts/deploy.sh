@@ -6,8 +6,8 @@
 #
 set -e
 
-if [ "$1" != "11" ] && [ "$1" != "10" ]; then
-  >&2 echo "Please specify 11 or 10"
+if [ "$1" != "11" ] && [ "$1" != "10" ] && [ "$1" != "11-no-sodium" ]; then
+  >&2 echo "Please specify 11 or 10 or 11-no-sodium"
   exit 1;
 fi
 

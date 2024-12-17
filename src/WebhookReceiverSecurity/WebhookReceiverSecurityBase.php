@@ -1,0 +1,135 @@
+<?php
+
+namespace Drupal\webhook_receiver\WebhookReceiverSecurity;
+
+use Drupal\Component\Utility\Crypt;
+use Drupal\Core\Site\Settings;
+use Drupal\Core\State\State;
+
+/**
+ * Manage tokens for webhooks.
+ */
+abstract class WebhookReceiverSecurityBase implements WebhookReceiverSecurityInteface {
+
+  /**
+   * The injected state store.
+   *
+   * @var \Drupal\Core\State\State
+   */
+  protected $state;
+
+  /**
+   * Constructs a new WebhookReceiver object.
+   *
+   * @param \Drupal\Core\State\State $state
+   *   An injected state service.
+   */
+  public function __construct(State $state) {
+    $this->state = $state;
+  }
+
+  /**
+   * Get the encryption key.
+   *
+   * Use the encryption key from the settings.php file's hash salt, never
+   * store it in the database, in case the database is compromised.
+   *
+   * @return string
+   *   An encryption key derived from the hash salt.
+   */
+  public function encryptionKey() : string {
+    $hash_salt = mb_substr(Settings::getHashSalt(), 0, SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+
+    if (!$hash_salt) {
+      throw new \Exception("Webhook Receiver requires that the sites's hash salt (often defined in settings.php) not be empty.");
+    }
+
+    $hash_salt_32 = mb_substr($hash_salt, 0, 32);
+
+    if (mb_strlen($hash_salt_32) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
+      throw new \Exception('The hash salt (defined in settings.php seems to be less than 32 bytes long. Webhook Receiver requires a hash salt of at least 32 bytes.)');
+    }
+
+    return $hash_salt_32;
+  }
+
+  /**
+   * Get all encrypted tokens keyed by id.
+   *
+   * @return array
+   *   All encyprted tokens keyed by id.
+   */
+  public function allEncryptedTokens() : array {
+    $tokens = $this->state->get(self::STATE_VAR, []);
+
+    if (!is_array($tokens)) {
+      $tokens = [];
+    }
+
+    return $tokens;
+  }
+
+  /**
+   * Get a token for a key, create a new one if it does not exist.
+   *
+   * @param string $key
+   *   A key to which this token should be associated.
+   *
+   * @return string
+   *   The decrypted token.
+   */
+  public function token(string $key) : string {
+    $key = (trim($key));
+
+    if (!$key) {
+      throw new \Exception('Webhook key must not be empty. The key is the plugin id, for example webhook_receiver_example_log_payload.');
+    }
+
+    $tokens = $this->allEncryptedTokens();
+
+    $encryption_key = $this->encryptionKey();
+
+    if (empty($tokens[$key]) || !is_string($tokens[$key])) {
+      $candidate = $this->createNewToken($key);
+    }
+    else {
+      try {
+        // Decrypt tokens because they are encrypted at rest.
+        $candidate = $this->safeDecrypt($tokens[$key], $encryption_key);
+      }
+      catch (\Throwable $t) {
+        $candidate = $this->createNewToken($key);
+      }
+    }
+
+    if (!$candidate) {
+      throw new \Exception('Something went wrong, the token should not be empty');
+    }
+
+    return $candidate;
+  }
+
+  /**
+   * Create a new token, encrypted it and save it to the database.
+   *
+   * If a token for this key already exists, it will be overwritten.
+   *
+   * @param string $key
+   *   A key to which this token should be associated.
+   *
+   * @return string
+   *   The unencrypted token.
+   */
+  public function createNewToken(string $key) : string {
+    $key = (trim($key));
+
+    $unencrypted = Crypt::hashBase64(random_bytes(128));
+    $tokens = $this->allEncryptedTokens();
+    // Encrypt newly-generated tokens following the principle of encryption
+    // at rest.
+    $tokens[$key] = $this->safeEncrypt($unencrypted, $this->encryptionKey());
+    $this->state->set(self::STATE_VAR, $tokens);
+    return $unencrypted;
+  }
+
+}

@@ -8,83 +8,24 @@ use Drupal\Core\State\State;
 
 /**
  * Manage tokens for webhooks.
+ *
+ * This class will work whether or not the sodium extension is installed.
  */
-class WebhookReceiverSecurity {
-
-  const STATE_VAR = 'webform_receiver_security';
+class WebhookReceiverSecurity extends WebhookReceiverSecurityBase {
 
   /**
-   * Encrypt a message.
+   * The injected security implementer which uses Sodium.
    *
-   * See https://stackoverflow.com/a/30159120/1207752.
-   *
-   * @param string $message
-   *   The unencrypted string.
-   * @param string $key
-   *   The encryption key which must be 32 bytes.
-   *
-   * @return string
-   *   The encrypted string.
+   * @var \Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecuritySodium
    */
-  public function safeEncrypt(string $message, string $key) : string {
-    if (mb_strlen($key, '8bit') !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
-      throw new \Exception('Key is not the correct size (must be 32 bytes).');
-    }
-    $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-
-    $cipher = base64_encode($nonce . sodium_crypto_secretbox($message, $nonce, $key));
-    sodium_memzero($message);
-    sodium_memzero($key);
-    return $cipher;
-  }
+  protected $securitySodium;
 
   /**
-   * Decrypt a message.
+   * The injected security implementer which does not use Sodium.
    *
-   * See https://stackoverflow.com/a/30159120/1207752.
-   *
-   * @param string $encrypted
-   *   The encrypted message.
-   * @param string $key
-   *   They encryption key.
-   *
-   * @return string
-   *   The unencrypted message.
+   * @var \Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecurityNoSodium
    */
-  public function safeDecrypt(string $encrypted, string $key) : string {
-    $decoded = base64_decode($encrypted);
-    $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
-    $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, NULL, '8bit');
-
-    $plain = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
-    if (!is_string($plain)) {
-      throw new \Exception("The encryption key used to decrypt the string does not seem to be the same as the encryption key used to encrypt it. This can happen, for example, if you have changed your site's hash salt in settings.php. The token cannot be retrieved; please regenerate it using webhook_receiver()->deleteToken(id)");
-    }
-    sodium_memzero($ciphertext);
-    sodium_memzero($key);
-    return $plain;
-  }
-
-  /**
-   * Remove a token from the database.
-   *
-   * @param string $id
-   *   A token to remove from the database.
-   */
-  public function removeToken(string $id) {
-    $id = (trim($id));
-
-    $tokens = $this->allEncryptedTokens();
-    unset($tokens[$id]);
-    $this->state->set(self::STATE_VAR, $tokens);
-  }
-
-  /**
-   * The injected state store.
-   *
-   * @var \Drupal\Core\State\State
-   */
-  protected $state;
+  protected $securityNoSodium;
 
   /**
    * Constructs a new WebhookReceiver object.
@@ -92,112 +33,63 @@ class WebhookReceiverSecurity {
    * @param \Drupal\Core\State\State $state
    *   An injected state service.
    */
-  public function __construct(State $state) {
-    $this->state = $state;
+  public function __construct(
+    State $state,
+    WebhookReceiverSecuritySodium $securitySodium,
+    WebhookReceiverSecurityNoSodium $securityNoSodium,
+  ) {
+    parent::__construct($state);
+    $this->securitySodium = $securitySodium;
+    $this->securityNoSodium = $securityNoSodium;
   }
 
   /**
-   * Get the encryption key.
+   * Check whether the Sodium PHP extension is installed.
    *
-   * Use the encryption key from the settings.php file's hash salt, never
-   * store it in the database, in case the database is compromised.
+   * On certain Red Hat systems, it is possible that the Sodium extension
+   * is not installed.
    *
-   * @return string
-   *   An encryption key derived from the hash salt.
+   * @return bool
+   *   TRUE if the Sodium extension is installed, FALSE otherwise.
    */
-  public function encryptionKey() : string {
-    $hash_salt = mb_substr(Settings::getHashSalt(), 0, SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
-
-    if (!$hash_salt) {
-      throw new \Exception("Webhook Receiver requires that the sites's hash salt (often defined in settings.php) not be empty.");
-    }
-
-    $hash_salt_32 = mb_substr($hash_salt, 0, 32);
-
-    if (mb_strlen($hash_salt_32) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
-      throw new \Exception('The hash salt (defined in settings.php seems to be less than 32 bytes long. Webhook Receiver requires a hash salt of at least 32 bytes.)');
-    }
-
-    return $hash_salt_32;
+  public function sodiumIsInstalled() : bool {
+    return defined('SODIUM_CRYPTO_SECRETBOX_KEYBYTES');
   }
 
   /**
-   * Get all encrypted tokens keyed by id.
+   * Get the security implementation.
    *
-   * @return array
-   *   All encyprted tokens keyed by id.
+   * @return \Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecurityInterface
+   *   The security implementation.
    */
-  public function allEncryptedTokens() : array {
-    $tokens = $this->state->get(self::STATE_VAR, []);
-
-    if (!is_array($tokens)) {
-      $tokens = [];
-    }
-
-    return $tokens;
-  }
-
-  /**
-   * Get a token for a key, create a new one if it does not exist.
-   *
-   * @param string $key
-   *   A key to which this token should be associated.
-   *
-   * @return string
-   *   The decrypted token.
-   */
-  public function token(string $key) : string {
-    $key = (trim($key));
-
-    if (!$key) {
-      throw new \Exception('Webhook key must not be empty. The key is the plugin id, for example webhook_receiver_example_log_payload.');
-    }
-
-    $tokens = $this->allEncryptedTokens();
-
-    $encryption_key = $this->encryptionKey();
-
-    if (empty($tokens[$key]) || !is_string($tokens[$key])) {
-      $candidate = $this->createNewToken($key);
+  public function securityImplementation() : WebhookReceiverSecurityInterface {
+    if ($this->sodiumIsInstalled()) {
+      return $this->securitySodium;
     }
     else {
-      try {
-        // Decrypt tokens because they are encrypted at rest.
-        $candidate = $this->safeDecrypt($tokens[$key], $encryption_key);
-      }
-      catch (\Throwable $t) {
-        $candidate = $this->createNewToken($key);
-      }
+      return $this->securityNoSodium;
     }
-
-    if (!$candidate) {
-      throw new \Exception('Something went wrong, the token should not be empty');
-    }
-
-    return $candidate;
   }
 
   /**
-   * Create a new token, encrypted it and save it to the database.
-   *
-   * If a token for this key already exists, it will be overwritten.
-   *
-   * @param string $key
-   *   A key to which this token should be associated.
-   *
-   * @return string
-   *   The unencrypted token.
+   * {@inheritdoc}
    */
-  public function createNewToken(string $key) : string {
-    $key = (trim($key));
+  public function safeEncrypt(string $message, string $key) : string {
+    return $this->securityImplementation()->safeEncrypt($message, $key);
+  }
 
-    $unencrypted = Crypt::hashBase64(random_bytes(128));
-    $tokens = $this->allEncryptedTokens();
-    // Encrypt newly-generated tokens following the principle of encryption
-    // at rest.
-    $tokens[$key] = $this->safeEncrypt($unencrypted, $this->encryptionKey());
-    $this->state->set(self::STATE_VAR, $tokens);
-    return $unencrypted;
+  /**
+   * {@inheritdoc}
+   */
+  public function safeDecrypt(string $encrypted, string $key) : string {
+    return $this->securityImplementation()->safeDecrypt($encrypted, $key);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function encryptionKey() : string {
+    return $this->securityImplementation()->encryptionKey();
   }
 
 }

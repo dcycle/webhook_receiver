@@ -5,7 +5,18 @@ services:
       Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecurity
     arguments:
       - '@state'
-      - '@uuid'
+      - '@webhook_receiver.security_sodium'
+      - '@webhook_receiver.security_no_sodium'
+  webhook_receiver.security_sodium:
+    class: >-
+      Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecuritySodium
+    arguments:
+      - '@state'
+  webhook_receiver.security_no_sodium:
+    class: >-
+      Drupal\webhook_receiver\WebhookReceiverSecurity\WebhookReceiverSecurityNoSodium
+    arguments:
+      - '@state'
   webhook_receiver.activity_logger:
     class: >-
       Drupal\webhook_receiver\WebhookReceiverActivityLog\WebhookReceiverActivityLog
